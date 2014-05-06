@@ -32,7 +32,7 @@ defined( 'WPINC' ) or die;
 
 // Pull in the plugin classes and initialize
 include( dirname( __FILE__ ) . '/classes/plugin.php' );
-GifDrop_Plugin::get_instance();
+GifDrop_Plugin::get_instance( __FILE__ );
 
 // Pull in the version checker and initialize
 include( dirname( __FILE__ ) . '/classes/version-check.php' );

@@ -7,18 +7,27 @@ class GifDrop_Plugin {
 	const OPTION = 'gifdrop';
 	const NONCE = 'gifdrop_save';
 
-	protected function __construct() {
+	protected function __construct( $__FILE__ ) {
 		self::$instance = $this;
+		$this->__FILE__ = $__FILE__;
 		$this->base = dirname( dirname( __FILE__ ) );
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 	}
 
-	public static function get_instance() {
+	public static function get_instance( $__FILE__ ) {
 		if ( ! isset( self::$instance ) ) {
-			new self;
+			new self( $__FILE__ );
 		}
 		return self::$instance;
+	}
+
+	protected function get_url() {
+		return plugin_dir_url( $this->__FILE__ );
+	}
+
+	protected function get_path() {
+		return plugin_dir_path( $this->__FILE__ );
 	}
 
 	public function init() {
@@ -51,7 +60,7 @@ class GifDrop_Plugin {
 	}
 
 	public function admin_enqueue_scripts() {
-		// Stub
+		wp_enqueue_script( 'gifdrop-settings', $this->get_url() . 'js/admin.js', array( 'jquery', 'wp-backbone' ), '0.1' );
 	}
 
 	public function admin_page() {
@@ -84,9 +93,28 @@ class GifDrop_Plugin {
 		$_post = stripslashes_deep( $_POST );
 		// $doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
 
-		// Update logic here
+		$pages = $this->get_page_ids();
+		$new_pages = isset( $_post['gifdrop_enabled'] ) ? array_map( 'intval', $_post['gifdrop_enabled'] ) : array();
+
+		$remove = array_values( array_diff( $pages, $new_pages ) );
+		$add = array_values( array_diff( $new_pages, $pages ) );
+
+		foreach ( $remove as $post_id ) {
+			delete_post_meta( $post_id, '_gifdrop_enabled' );
+		}
+
+		foreach ( $add as $post_id ) {
+			update_post_meta( $post_id, '_gifdrop_enabled', 'enabled' );
+		}
 
 		wp_redirect( $this->admin_url() . '&updated=true' );
 		exit;
+	}
+
+	protected function get_page_ids() {
+		global $wpdb;
+		$pages = $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_gifdrop_enabled'" );
+		$pages = $pages ? array_map( 'intval', $pages ) : array();
+		return $pages;
 	}
 }
