@@ -21,7 +21,7 @@ defined( 'WPINC' ) or die;
 						<?php wp_dropdown_pages( array(
 							'name' => 'ignored',
 							'show_option_none' => __( '&mdash; Select &mdash;', 'gifdrop' ),
-						) ); ?> <input type="submit" class="button button-secondary" value="add page" />
+						) ); ?> <button type="button" class="button button-secondary"><?php _e( 'add page' ); ?></button>
 					</div>
 				</td>
 			</tr>
@@ -35,5 +35,5 @@ defined( 'WPINC' ) or die;
 <script type="text/html" id="tmpl-gifdrop-page">
 <?php wp_dropdown_pages( array(
 	'name' => 'gifdrop_enabled[]',
-)); ?> <input type="submit" class="button button-secondary" value="<?php _e( 'remove', 'gifdrop' ); ?>" />
+)); ?> <button type="button" class="button button-secondary"><?php _e( 'remove', 'gifdrop' ); ?></button>
 </script>

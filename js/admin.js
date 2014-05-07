@@ -21,14 +21,25 @@
         collection: app.pages
       });
       app.views.pages.init();
-      return $('.gifdrop-add-page input').click(function(e) {
-        var select;
+      app.addSelect = $('.gifdrop-add-page select');
+      app.addButton = $('.gifdrop-add-page button');
+      app.addSelect.keydown(function(e) {
+        if (e.keyCode === 13) {
+          e.preventDefault();
+          return app.addButton.click();
+        }
+      });
+      return app.addButton.click(function(e) {
+        var $t, select;
         e.preventDefault();
-        select = $(this).siblings('select');
+        $t = $(e.target);
+        select = $t.siblings('select');
         if (select.val()) {
-          return app.pages.add({
+          app.pages.add({
             id: parseInt(select.val(), 10)
           });
+          select.val('');
+          return select.focus();
         }
       });
     }
@@ -72,13 +83,22 @@
     PagesView.prototype.className = 'gifdrop-selections';
 
     PagesView.prototype.initialize = function() {
-      return this.listenTo(this.collection, 'add', this.addView);
+      this.listenTo(this.collection, 'add', this.addView);
+      return this.listenTo(this.collection, 'remove', this.selectPrevious);
     };
 
     PagesView.prototype.addView = function(model) {
       return this.views.add(new app.PageView({
         model: model
       }));
+    };
+
+    PagesView.prototype.selectPrevious = function(model, collection, options) {
+      var prev;
+      prev = collection.at(_.max([options.index - 1, 0]));
+      if (prev) {
+        return prev.trigger('select');
+      }
     };
 
     PagesView.prototype.init = function() {
@@ -133,11 +153,23 @@
     PageView.prototype.className = 'gifdrop-selection';
 
     PageView.prototype.events = {
-      'click input': 'userRemove'
+      'click button': 'userRemove',
+      'keydown select': 'keydown'
     };
 
     PageView.prototype.initialize = function() {
-      return this.listenTo(this.model, 'remove', this.remove);
+      this.listenTo(this.model, 'remove', this.remove);
+      return this.listenTo(this.model, 'select', this.selectRemoveButton);
+    };
+
+    PageView.prototype.selectRemoveButton = function() {
+      return this.removeButton.focus();
+    };
+
+    PageView.prototype.keydown = function(e) {
+      if (e.keyCode === 13) {
+        return e.preventDefault();
+      }
     };
 
     PageView.prototype.userRemove = function(e) {
@@ -146,7 +178,9 @@
     };
 
     PageView.prototype.ready = function() {
-      return this.$('select').val(this.model.id);
+      this.dropdown = this.$('select');
+      this.removeButton = this.$('button');
+      return this.dropdown.val(this.model.id);
     };
 
     return PageView;

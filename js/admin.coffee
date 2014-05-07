@@ -8,11 +8,20 @@ app = window.gifDropAdmin =
 		app.views.pages = new app.PagesView
 			collection: app.pages
 		app.views.pages.init()
-		$( '.gifdrop-add-page input' ).click (e) ->
+		app.addSelect = $ '.gifdrop-add-page select'
+		app.addButton = $ '.gifdrop-add-page button'
+		app.addSelect.keydown (e) ->
+			if e.keyCode is 13
+				e.preventDefault()
+				app.addButton.click()
+		app.addButton.click (e) ->
 			e.preventDefault()
-			select = $(@).siblings('select')
+			$t = $ e.target
+			select = $t.siblings 'select'
 			if select.val()
 				app.pages.add id: parseInt( select.val(), 10 )
+				select.val ''
+				select.focus()
 
 class app.Page extends Backbone.Model
 
@@ -27,9 +36,14 @@ class app.PagesView extends wp.Backbone.View
 
 	initialize: ->
 		@listenTo @collection, 'add', @addView
+		@listenTo @collection, 'remove', @selectPrevious
 
 	addView: (model) ->
 		@views.add new app.PageView model: model
+
+	selectPrevious: (model, collection, options) ->
+		prev = collection.at _.max [options.index - 1, 0]
+		prev.trigger 'select' if prev
 
 	init: ->
 		@setSubviews()
@@ -49,17 +63,27 @@ class app.PageView extends wp.Backbone.View
 	template: wp.template 'gifdrop-page'
 	className: 'gifdrop-selection'
 	events:
-		'click input': 'userRemove'
+		'click button': 'userRemove'
+		'keydown select': 'keydown'
 
 	initialize: ->
 		@listenTo @model, 'remove', @remove
+		@listenTo @model, 'select', @selectRemoveButton
+
+	selectRemoveButton: ->
+		@removeButton.focus()
+
+	keydown: (e) ->
+		e.preventDefault() if e.keyCode is 13
 
 	userRemove: (e) ->
 		e.preventDefault()
 		@model.trigger 'userRemove', @model
 
 	ready: ->
-		@$('select').val @model.id
+		@dropdown = @$ 'select'
+		@removeButton = @$ 'button'
+		@dropdown.val @model.id
 
 $ ->
 	app.init()
