@@ -1,45 +1,31 @@
 $ = window.jQuery
 app = window.gifDropAdmin =
 	views: []
-	add: (select) ->
-		select.clone().appendTo app.selections
+
+	add: (select) -> select.clone().appendTo app.selections
+
 	init: ->
 		app.pages = new app.Pages _.map( app.pageIds, (id) -> id: parseInt( id, 10 ) )
 		app.views.pages = new app.PagesView
 			collection: app.pages
 		app.views.pages.init()
-		app.addSelect = $ '.gifdrop-add-page select'
-		app.addButton = $ '.gifdrop-add-page button'
-		app.addSelect.keydown (e) ->
-			if e.keyCode is 13
-				e.preventDefault()
-				app.addButton.click()
-		app.addButton.click (e) ->
-			e.preventDefault()
-			$t = $ e.target
-			select = $t.siblings 'select'
-			if select.val()
-				app.pages.add id: parseInt( select.val(), 10 )
-				select.val ''
-				select.focus()
 
+# Page model
 class app.Page extends Backbone.Model
 
+# Pages collection
 class app.Pages extends Backbone.Collection
-	model: app.Page
+	initialize: -> @listenTo @, 'userRemove', @remove
 
-	initialize: ->
-		@listenTo @, 'userRemove', @remove
-
+# Main view
 class app.PagesView extends wp.Backbone.View
-	className: 'gifdrop-selections'
+	template: wp.template 'gifdrop-pages'
 
 	initialize: ->
-		@listenTo @collection, 'add', @addView
+		@listenTo @collection, 'add', @addPage
 		@listenTo @collection, 'remove', @selectPrevious
 
-	addView: (model) ->
-		@views.add new app.PageView model: model
+	addPage: (model) -> @views.add '.gifdrop-selections-wrap', new app.PageView model: model
 
 	selectPrevious: (model, collection, options) ->
 		prev = collection.at _.max [options.index - 1, 0]
@@ -48,17 +34,40 @@ class app.PagesView extends wp.Backbone.View
 	init: ->
 		@setSubviews()
 		@render()
-		$('.gifdrop-selections-wrap').html @el
+		$('.gifdrop-select-pages-section').html @el
 		@views.ready()
 
 	setSubviews: ->
 		unless @views.length
-			@views.add new app.PagesViewExtras
-			@views.add new app.PageView model: model for model in @collection.models
+			@views.set '.gifdrop-add-page', new app.PagesViewAdd
+			for model in @collection.models
+				@addPage model
 
-class app.PagesViewExtras extends wp.Backbone.View
-	template: wp.template 'gifdrop-pages-extras'
+# View for the add page portion
+class app.PagesViewAdd extends wp.Backbone.View
+	template: wp.template 'gifdrop-pages-add'
+	events:
+		'keydown select': 'keydownSelect'
+		'click button': 'clickButton'
 
+	keydownSelect: (e) ->
+		if e.keyCode is 13
+			e.preventDefault()
+			@clickButton()
+
+	handleClickButton: (e) =>
+		e.preventDefault()
+		@clickButton()
+
+	clickButton: ->
+		if @dropdown.val()
+			app.pages.add id: parseInt( @dropdown.val(), 10 )
+			@dropdown.val ''
+		@dropdown.focus()
+
+	ready: -> @dropdown = @$ 'select'
+
+# View for each individual page
 class app.PageView extends wp.Backbone.View
 	template: wp.template 'gifdrop-page'
 	className: 'gifdrop-selection'
@@ -70,11 +79,9 @@ class app.PageView extends wp.Backbone.View
 		@listenTo @model, 'remove', @remove
 		@listenTo @model, 'select', @selectRemoveButton
 
-	selectRemoveButton: ->
-		@removeButton.focus()
+	selectRemoveButton: -> @removeButton.focus()
 
-	keydown: (e) ->
-		e.preventDefault() if e.keyCode is 13
+	keydown: (e) -> e.preventDefault() if e.keyCode is 13
 
 	userRemove: (e) ->
 		e.preventDefault()

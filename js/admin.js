@@ -2,7 +2,8 @@
 (function() {
   var $, app,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   $ = window.jQuery;
 
@@ -20,28 +21,7 @@
       app.views.pages = new app.PagesView({
         collection: app.pages
       });
-      app.views.pages.init();
-      app.addSelect = $('.gifdrop-add-page select');
-      app.addButton = $('.gifdrop-add-page button');
-      app.addSelect.keydown(function(e) {
-        if (e.keyCode === 13) {
-          e.preventDefault();
-          return app.addButton.click();
-        }
-      });
-      return app.addButton.click(function(e) {
-        var $t, select;
-        e.preventDefault();
-        $t = $(e.target);
-        select = $t.siblings('select');
-        if (select.val()) {
-          app.pages.add({
-            id: parseInt(select.val(), 10)
-          });
-          select.val('');
-          return select.focus();
-        }
-      });
+      return app.views.pages.init();
     }
   };
 
@@ -63,8 +43,6 @@
       return Pages.__super__.constructor.apply(this, arguments);
     }
 
-    Pages.prototype.model = app.Page;
-
     Pages.prototype.initialize = function() {
       return this.listenTo(this, 'userRemove', this.remove);
     };
@@ -80,15 +58,15 @@
       return PagesView.__super__.constructor.apply(this, arguments);
     }
 
-    PagesView.prototype.className = 'gifdrop-selections';
+    PagesView.prototype.template = wp.template('gifdrop-pages');
 
     PagesView.prototype.initialize = function() {
-      this.listenTo(this.collection, 'add', this.addView);
+      this.listenTo(this.collection, 'add', this.addPage);
       return this.listenTo(this.collection, 'remove', this.selectPrevious);
     };
 
-    PagesView.prototype.addView = function(model) {
-      return this.views.add(new app.PageView({
+    PagesView.prototype.addPage = function(model) {
+      return this.views.add('.gifdrop-selections-wrap', new app.PageView({
         model: model
       }));
     };
@@ -104,21 +82,19 @@
     PagesView.prototype.init = function() {
       this.setSubviews();
       this.render();
-      $('.gifdrop-selections-wrap').html(this.el);
+      $('.gifdrop-select-pages-section').html(this.el);
       return this.views.ready();
     };
 
     PagesView.prototype.setSubviews = function() {
       var model, _i, _len, _ref, _results;
       if (!this.views.length) {
-        this.views.add(new app.PagesViewExtras);
+        this.views.set('.gifdrop-add-page', new app.PagesViewAdd);
         _ref = this.collection.models;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          _results.push(this.views.add(new app.PageView({
-            model: model
-          })));
+          _results.push(this.addPage(model));
         }
         return _results;
       }
@@ -128,16 +104,48 @@
 
   })(wp.Backbone.View);
 
-  app.PagesViewExtras = (function(_super) {
-    __extends(PagesViewExtras, _super);
+  app.PagesViewAdd = (function(_super) {
+    __extends(PagesViewAdd, _super);
 
-    function PagesViewExtras() {
-      return PagesViewExtras.__super__.constructor.apply(this, arguments);
+    function PagesViewAdd() {
+      this.handleClickButton = __bind(this.handleClickButton, this);
+      return PagesViewAdd.__super__.constructor.apply(this, arguments);
     }
 
-    PagesViewExtras.prototype.template = wp.template('gifdrop-pages-extras');
+    PagesViewAdd.prototype.template = wp.template('gifdrop-pages-add');
 
-    return PagesViewExtras;
+    PagesViewAdd.prototype.events = {
+      'keydown select': 'keydownSelect',
+      'click button': 'clickButton'
+    };
+
+    PagesViewAdd.prototype.keydownSelect = function(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        return this.clickButton();
+      }
+    };
+
+    PagesViewAdd.prototype.handleClickButton = function(e) {
+      e.preventDefault();
+      return this.clickButton();
+    };
+
+    PagesViewAdd.prototype.clickButton = function() {
+      if (this.dropdown.val()) {
+        app.pages.add({
+          id: parseInt(this.dropdown.val(), 10)
+        });
+        this.dropdown.val('');
+      }
+      return this.dropdown.focus();
+    };
+
+    PagesViewAdd.prototype.ready = function() {
+      return this.dropdown = this.$('select');
+    };
+
+    return PagesViewAdd;
 
   })(wp.Backbone.View);
 

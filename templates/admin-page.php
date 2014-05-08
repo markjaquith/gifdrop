@@ -10,26 +10,27 @@ defined( 'WPINC' ) or die;
 		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><label for="gifdrop-pages"><?php _e( 'GifDrop Pages', 'gifdrop' ); ?></label></th>
-				<td>
-					<p><?php _e( 'Select the pages on which GifDrop should be active:', 'gifdrop' ); ?></p>
-					<div class="gifdrop-selections-wrap">
-						<noscript><?php _e( 'You must enable JavaScript.', 'gifdrop' ); ?></noscript>
-					</div>
-					<script>gifDropAdmin.pageIds = <?php echo json_encode( $this->get_page_ids() ); ?>;</script>
-					<hr />
-					<div class="gifdrop-add-page">
-						<?php wp_dropdown_pages( array(
-							'name' => 'ignored',
-							'show_option_none' => __( '&mdash; Select &mdash;', 'gifdrop' ),
-						) ); ?> <button type="button" class="button button-secondary"><?php _e( 'add page' ); ?></button>
-					</div>
+				<td class="gifdrop-select-pages-section">
+					<noscript><p><?php _e( 'You must enable JavaScript.', 'gifdrop' ); ?></p></noscript>
 				</td>
 			</tr>
 		</table>
+		<script>gifDropAdmin.pageIds = <?php echo json_encode( $this->get_page_ids() ); ?>;</script>
 		<?php submit_button( __('Save Changes', 'gifdrop' ), 'primary', 'submit', true ); ?>
 	</form>
 </div>
-<script type="text/html" id="tmpl-gifdrop-pages-extras">
+<script type="text/html" id="tmpl-gifdrop-pages">
+	<p><?php _e( 'Select the pages on which GifDrop should be active:', 'gifdrop' ); ?></p>
+	<div class="gifdrop-selections-wrap"></div>
+	<hr />
+	<div class="gifdrop-add-page"></div>
+</script>
+<script type="text/html" id="tmpl-gifdrop-pages-add">
+<?php
+wp_dropdown_pages( array(
+	'name' => 'ignored',
+	'show_option_none' => __( '&mdash; Select &mdash;', 'gifdrop' ),
+) ); ?> <button type="button" class="button button-secondary"><?php _e( 'add page' ); ?></button>
 <input type="hidden" name="gifdrop_js" value="enabled" />
 </script>
 <script type="text/html" id="tmpl-gifdrop-page">
