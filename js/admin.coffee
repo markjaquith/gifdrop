@@ -2,17 +2,19 @@ $ = window.jQuery
 app = window.gifDropAdmin =
 
 	init: ->
-		@pages = new @Pages _.map @pageIds, (id) =>
-			id: parseInt( id, 10 )
-			title: @allPages[id]
+		@pages = new @Pages _.map @pageIds, (id) => @allPages.get id
 		@pagesView = new @PagesView collection: @pages
 		@pagesView.init()
 
 # Page model
 class app.Page extends Backbone.Model
+	initialize: ->
+		@set 'title', app.allPages.get(@get 'id').get 'title' unless @get 'title'
 
 # Pages collection
 class app.Pages extends Backbone.Collection
+	model: app.Page
+
 	initialize: ->
 		@listenTo @, 'removeMe', @remove
 
@@ -29,7 +31,10 @@ class app.PagesView extends wp.Backbone.View
 	selectPrevious: (model, collection, options) ->
 		if options?.withKeyboard?
 			prev = collection.at _.max [options.index - 1, 0]
-			prev.trigger 'selectRemoveButton' if prev
+			if prev
+				prev.trigger 'selectRemoveButton'
+			else
+				collection.trigger 'selectAddNew'
 
 	init: ->
 		@setSubviews()
@@ -51,6 +56,7 @@ class app.PagesViewAdd extends wp.Backbone.View
 
 	initialize: ->
 		@listenTo @collection, 'add remove', @disableUsedPages
+		@listenTo @collection, 'selectAddNew', @selectAddNew
 
 	disableUsedPages: ->
 		@dropdownOptions.attr 'disabled', false
@@ -70,11 +76,11 @@ class app.PagesViewAdd extends wp.Backbone.View
 	clickButton: ->
 		if @dropdown.val()
 			id = parseInt( @dropdown.val(), 10 )
-			app.pages.add
-				id: id
-				title: app.allPages[id]
+			app.pages.add app.allPages.get id
 			@dropdown.val ''
 		@dropdown.focus()
+
+	selectAddNew: -> @dropdown.focus()
 
 	ready: ->
 		@dropdown = @$ 'select'

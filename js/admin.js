@@ -11,10 +11,7 @@
     init: function() {
       this.pages = new this.Pages(_.map(this.pageIds, (function(_this) {
         return function(id) {
-          return {
-            id: parseInt(id, 10),
-            title: _this.allPages[id]
-          };
+          return _this.allPages.get(id);
         };
       })(this)));
       this.pagesView = new this.PagesView({
@@ -31,6 +28,12 @@
       return Page.__super__.constructor.apply(this, arguments);
     }
 
+    Page.prototype.initialize = function() {
+      if (!this.get('title')) {
+        return this.set('title', app.allPages.get(this.get('id')).get('title'));
+      }
+    };
+
     return Page;
 
   })(Backbone.Model);
@@ -41,6 +44,8 @@
     function Pages() {
       return Pages.__super__.constructor.apply(this, arguments);
     }
+
+    Pages.prototype.model = app.Page;
 
     Pages.prototype.initialize = function() {
       return this.listenTo(this, 'removeMe', this.remove);
@@ -76,6 +81,8 @@
         prev = collection.at(_.max([options.index - 1, 0]));
         if (prev) {
           return prev.trigger('selectRemoveButton');
+        } else {
+          return collection.trigger('selectAddNew');
         }
       }
     };
@@ -122,7 +129,8 @@
     };
 
     PagesViewAdd.prototype.initialize = function() {
-      return this.listenTo(this.collection, 'add remove', this.disableUsedPages);
+      this.listenTo(this.collection, 'add remove', this.disableUsedPages);
+      return this.listenTo(this.collection, 'selectAddNew', this.selectAddNew);
     };
 
     PagesViewAdd.prototype.disableUsedPages = function() {
@@ -151,12 +159,13 @@
       var id;
       if (this.dropdown.val()) {
         id = parseInt(this.dropdown.val(), 10);
-        app.pages.add({
-          id: id,
-          title: app.allPages[id]
-        });
+        app.pages.add(app.allPages.get(id));
         this.dropdown.val('');
       }
+      return this.dropdown.focus();
+    };
+
+    PagesViewAdd.prototype.selectAddNew = function() {
       return this.dropdown.focus();
     };
 

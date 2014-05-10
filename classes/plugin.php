@@ -122,7 +122,10 @@ class GifDrop_Plugin {
 		$all_pages = get_pages();
 		$pages_out = array();
 		foreach ( $all_pages as $page ) {
-			$pages_out[$page->ID] = apply_filters( 'the_title', $page->post_title, $page->ID );
+			$pages_out[] = (object) array(
+				'id' => intval( $page->ID ),
+				'title' => apply_filters( 'the_title', $page->post_title, $page->ID )
+			);
 		}
 		return $pages_out;
 	}

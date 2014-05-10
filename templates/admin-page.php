@@ -30,7 +30,7 @@ defined( 'WPINC' ) or die;
 		</table>
 		<script>
 			gifDropAdmin.pageIds = <?php echo json_encode( $this->get_page_ids() ); ?>;
-			gifDropAdmin.allPages = <?php echo json_encode( $this->get_all_pages() ); ?>;
+			gifDropAdmin.allPages = new Backbone.Collection( <?php echo json_encode( $this->get_all_pages() ); ?> );
 		</script>
 		<?php submit_button( __('Save Changes', 'gifdrop' ), 'primary', 'submit', true ); ?>
 	</form>
