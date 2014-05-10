@@ -31,10 +31,8 @@ class app.PagesView extends wp.Backbone.View
 	selectPrevious: (model, collection, options) ->
 		if options?.withKeyboard?
 			prev = collection.at _.max [options.index - 1, 0]
-			if prev
-				prev.trigger 'selectRemoveButton'
-			else
-				collection.trigger 'selectAddNew'
+			prev.trigger 'selectRemoveButton' if prev
+		collection.trigger 'selectAddNew' unless collection.length
 
 	init: ->
 		@setSubviews()

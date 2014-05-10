@@ -80,10 +80,11 @@
       if ((options != null ? options.withKeyboard : void 0) != null) {
         prev = collection.at(_.max([options.index - 1, 0]));
         if (prev) {
-          return prev.trigger('selectRemoveButton');
-        } else {
-          return collection.trigger('selectAddNew');
+          prev.trigger('selectRemoveButton');
         }
+      }
+      if (!collection.length) {
+        return collection.trigger('selectAddNew');
       }
     };
 
