@@ -9,11 +9,14 @@
 
   app = window.gifDropAdmin = {
     init: function() {
-      this.pages = new this.Pages(_.map(this.pageIds, function(id) {
-        return {
-          id: parseInt(id, 10)
+      this.pages = new this.Pages(_.map(this.pageIds, (function(_this) {
+        return function(id) {
+          return {
+            id: parseInt(id, 10),
+            title: _this.allPages[id]
+          };
         };
-      }));
+      })(this)));
       this.pagesView = new this.PagesView({
         collection: this.pages
       });
@@ -145,9 +148,12 @@
     };
 
     PagesViewAdd.prototype.clickButton = function() {
+      var id;
       if (this.dropdown.val()) {
+        id = parseInt(this.dropdown.val(), 10);
         app.pages.add({
-          id: parseInt(this.dropdown.val(), 10)
+          id: id,
+          title: app.allPages[id]
         });
         this.dropdown.val('');
       }
@@ -204,10 +210,7 @@
     };
 
     PageView.prototype.prepare = function() {
-      return {
-        title: app.allPages[this.model.get('id')],
-        id: this.model.get('id')
-      };
+      return this.model.toJSON();
     };
 
     PageView.prototype.ready = function() {

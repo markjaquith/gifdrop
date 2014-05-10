@@ -2,7 +2,9 @@ $ = window.jQuery
 app = window.gifDropAdmin =
 
 	init: ->
-		@pages = new @Pages _.map( @pageIds, (id) -> id: parseInt( id, 10 ) )
+		@pages = new @Pages _.map @pageIds, (id) =>
+			id: parseInt( id, 10 )
+			title: @allPages[id]
 		@pagesView = new @PagesView collection: @pages
 		@pagesView.init()
 
@@ -67,7 +69,10 @@ class app.PagesViewAdd extends wp.Backbone.View
 
 	clickButton: ->
 		if @dropdown.val()
-			app.pages.add id: parseInt( @dropdown.val(), 10 )
+			id = parseInt( @dropdown.val(), 10 )
+			app.pages.add
+				id: id
+				title: app.allPages[id]
 			@dropdown.val ''
 		@dropdown.focus()
 
@@ -100,8 +105,7 @@ class app.PageView extends wp.Backbone.View
 			@model.trigger 'removeMe', @model, withKeyboard: yes
 
 	prepare: ->
-		title: app.allPages[@model.get 'id']
-		id: @model.get 'id'
+		@model.toJSON()
 
 	ready: ->
 		@removeButton = @$ 'button'
