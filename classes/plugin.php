@@ -117,4 +117,13 @@ class GifDrop_Plugin {
 		$pages = $pages ? array_map( 'intval', $pages ) : array();
 		return $pages;
 	}
+
+	protected function get_all_pages() {
+		$all_pages = get_pages();
+		$pages_out = array();
+		foreach ( $all_pages as $page ) {
+			$pages_out[$page->ID] = apply_filters( 'the_title', $page->post_title, $page->ID );
+		}
+		return $pages_out;
+	}
 }

@@ -69,9 +69,11 @@
 
     PagesView.prototype.selectPrevious = function(model, collection, options) {
       var prev;
-      prev = collection.at(_.max([options.index - 1, 0]));
-      if (prev) {
-        return prev.trigger('selectRemoveButton');
+      if ((options != null ? options.withKeyboard : void 0) != null) {
+        prev = collection.at(_.max([options.index - 1, 0]));
+        if (prev) {
+          return prev.trigger('selectRemoveButton');
+        }
       }
     };
 
@@ -84,7 +86,9 @@
 
     PagesView.prototype.setSubviews = function() {
       var model, _i, _len, _ref, _results;
-      this.views.set('.gifdrop-add-page', new app.PagesViewAdd);
+      this.views.set('.gifdrop-add-page', new app.PagesViewAdd({
+        collection: this.collection
+      }));
       this.views.unset('.gifdrop-selections-wrap');
       _ref = this.collection.models;
       _results = [];
@@ -114,6 +118,20 @@
       'click button': 'clickButton'
     };
 
+    PagesViewAdd.prototype.initialize = function() {
+      return this.listenTo(this.collection, 'add remove', this.disableUsedPages);
+    };
+
+    PagesViewAdd.prototype.disableUsedPages = function() {
+      var onlyUsed, usedPageIds;
+      this.dropdownOptions.attr('disabled', false);
+      usedPageIds = _.pluck(this.collection.models, 'id');
+      onlyUsed = function() {
+        return _.contains(usedPageIds, parseInt(this.value, 10));
+      };
+      return this.dropdownOptions.filter(onlyUsed).attr('disabled', true);
+    };
+
     PagesViewAdd.prototype.keydownSelect = function(e) {
       if (e.which === 13) {
         e.preventDefault();
@@ -137,7 +155,9 @@
     };
 
     PagesViewAdd.prototype.ready = function() {
-      return this.dropdown = this.$('select');
+      this.dropdown = this.$('select');
+      this.dropdownOptions = this.dropdown.find('option');
+      return this.disableUsedPages();
     };
 
     return PagesViewAdd;
@@ -157,7 +177,7 @@
 
     PageView.prototype.events = {
       'click button': 'clickRemove',
-      'keydown select': 'keydownSelect'
+      'keydown button': 'pressRemove'
     };
 
     PageView.prototype.initialize = function() {
@@ -169,22 +189,29 @@
       return this.removeButton.focus();
     };
 
-    PageView.prototype.keydownSelect = function(e) {
-      if (e.which === 13) {
-        return e.preventDefault();
+    PageView.prototype.clickRemove = function(e) {
+      e.preventDefault();
+      return this.model.trigger('removeMe', this.model);
+    };
+
+    PageView.prototype.pressRemove = function(e) {
+      if (_.contains([13, 32], e.which)) {
+        e.preventDefault();
+        return this.model.trigger('removeMe', this.model, {
+          withKeyboard: true
+        });
       }
     };
 
-    PageView.prototype.clickRemove = function(e) {
-      e.preventDefault();
-      this.model.trigger('removeMe', this.model);
-      return this.remove();
+    PageView.prototype.prepare = function() {
+      return {
+        title: app.allPages[this.model.get('id')],
+        id: this.model.get('id')
+      };
     };
 
     PageView.prototype.ready = function() {
-      this.dropdown = this.$('select');
-      this.removeButton = this.$('button');
-      return this.dropdown.val(this.model.id);
+      return this.removeButton = this.$('button');
     };
 
     return PageView;

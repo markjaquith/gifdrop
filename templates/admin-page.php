@@ -1,6 +1,19 @@
 <?php
 defined( 'WPINC' ) or die;
 ?>
+<style>
+/* Temporarily inline */
+.gifdrop-selections-wrap {
+	margin-top: 15px;
+}
+.gifdrop-selection > span {
+	width: 150px;
+	overflow: hidden;
+	display: inline-block;
+	line-height: 2em;
+	font-weight: bold;
+}
+</style>
 <div class="wrap">
 	<h2><?php echo esc_html( $GLOBALS['title'] ); ?></h2>
 
@@ -15,7 +28,10 @@ defined( 'WPINC' ) or die;
 				</td>
 			</tr>
 		</table>
-		<script>gifDropAdmin.pageIds = <?php echo json_encode( $this->get_page_ids() ); ?>;</script>
+		<script>
+			gifDropAdmin.pageIds = <?php echo json_encode( $this->get_page_ids() ); ?>;
+			gifDropAdmin.allPages = <?php echo json_encode( $this->get_all_pages() ); ?>;
+		</script>
 		<?php submit_button( __('Save Changes', 'gifdrop' ), 'primary', 'submit', true ); ?>
 	</form>
 </div>
@@ -37,7 +53,6 @@ wp_dropdown_pages( array(
 </script>
 
 <script type="text/html" id="tmpl-gifdrop-page">
-<?php wp_dropdown_pages( array(
-	'name' => 'gifdrop_enabled[]',
-)); ?> <button type="button" class="button button-secondary"><?php _e( 'remove', 'gifdrop' ); ?></button>
+<span>{{data.title}}</span> <button type="button" class="button button-secondary"><?php _e( 'remove', 'gifdrop' ); ?></button>
+	<input type="hidden" name="gifdrop_enabled[]" value="{{data.id}}" />
 </script>

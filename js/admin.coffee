@@ -25,8 +25,9 @@ class app.PagesView extends wp.Backbone.View
 	addPageView: (model) -> @views.add '.gifdrop-selections-wrap', new app.PageView model: model
 
 	selectPrevious: (model, collection, options) ->
-		prev = collection.at _.max [options.index - 1, 0]
-		prev.trigger 'selectRemoveButton' if prev
+		if options?.withKeyboard?
+			prev = collection.at _.max [options.index - 1, 0]
+			prev.trigger 'selectRemoveButton' if prev
 
 	init: ->
 		@setSubviews()
@@ -35,7 +36,7 @@ class app.PagesView extends wp.Backbone.View
 		@views.ready()
 
 	setSubviews: ->
-		@views.set '.gifdrop-add-page', new app.PagesViewAdd
+		@views.set '.gifdrop-add-page', new app.PagesViewAdd collection: @collection
 		@views.unset '.gifdrop-selections-wrap'
 		@addPageView model for model in @collection.models
 
@@ -45,6 +46,15 @@ class app.PagesViewAdd extends wp.Backbone.View
 	events:
 		'keydown select': 'keydownSelect'
 		'click button': 'clickButton'
+
+	initialize: ->
+		@listenTo @collection, 'add remove', @disableUsedPages
+
+	disableUsedPages: ->
+		@dropdownOptions.attr 'disabled', false
+		usedPageIds = _.pluck @collection.models, 'id'
+		onlyUsed = -> _.contains usedPageIds, parseInt(@value, 10)
+		@dropdownOptions.filter(onlyUsed).attr 'disabled', true
 
 	keydownSelect: (e) ->
 		if e.which is 13
@@ -63,6 +73,8 @@ class app.PagesViewAdd extends wp.Backbone.View
 
 	ready: ->
 		@dropdown = @$ 'select'
+		@dropdownOptions = @dropdown.find 'option'
+		@disableUsedPages()
 
 # View for each individual page
 class app.PageView extends wp.Backbone.View
@@ -70,7 +82,7 @@ class app.PageView extends wp.Backbone.View
 	className: 'gifdrop-selection'
 	events:
 		'click button': 'clickRemove'
-		'keydown select': 'keydownSelect'
+		'keydown button': 'pressRemove'
 
 	initialize: ->
 		@listenTo @model, 'remove', @remove
@@ -78,17 +90,20 @@ class app.PageView extends wp.Backbone.View
 
 	selectRemoveButton: -> @removeButton.focus()
 
-	keydownSelect: (e) ->
-		e.preventDefault() if e.which is 13
-
 	clickRemove: (e) ->
 		e.preventDefault()
 		@model.trigger 'removeMe', @model
-		@remove()
+
+	pressRemove: (e) ->
+		if _.contains [13, 32], e.which
+			e.preventDefault()
+			@model.trigger 'removeMe', @model, withKeyboard: yes
+
+	prepare: ->
+		title: app.allPages[@model.get 'id']
+		id: @model.get 'id'
 
 	ready: ->
-		@dropdown = @$ 'select'
 		@removeButton = @$ 'button'
-		@dropdown.val @model.id
 
 $ -> app.init()
