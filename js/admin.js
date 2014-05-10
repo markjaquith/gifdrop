@@ -8,20 +8,16 @@
   $ = window.jQuery;
 
   app = window.gifDropAdmin = {
-    views: [],
-    add: function(select) {
-      return select.clone().appendTo(app.selections);
-    },
     init: function() {
-      app.pages = new app.Pages(_.map(app.pageIds, function(id) {
+      this.pages = new this.Pages(_.map(this.pageIds, function(id) {
         return {
           id: parseInt(id, 10)
         };
       }));
-      app.views.pages = new app.PagesView({
-        collection: app.pages
+      this.pagesView = new this.PagesView({
+        collection: this.pages
       });
-      return app.views.pages.init();
+      return this.pagesView.init();
     }
   };
 
@@ -44,7 +40,7 @@
     }
 
     Pages.prototype.initialize = function() {
-      return this.listenTo(this, 'userRemove', this.remove);
+      return this.listenTo(this, 'removeMe', this.remove);
     };
 
     return Pages;
@@ -75,7 +71,7 @@
       var prev;
       prev = collection.at(_.max([options.index - 1, 0]));
       if (prev) {
-        return prev.trigger('select');
+        return prev.trigger('selectRemoveButton');
       }
     };
 
@@ -88,16 +84,15 @@
 
     PagesView.prototype.setSubviews = function() {
       var model, _i, _len, _ref, _results;
-      if (!this.views.length) {
-        this.views.set('.gifdrop-add-page', new app.PagesViewAdd);
-        _ref = this.collection.models;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          model = _ref[_i];
-          _results.push(this.addPage(model));
-        }
-        return _results;
+      this.views.set('.gifdrop-add-page', new app.PagesViewAdd);
+      this.views.unset('.gifdrop-selections-wrap');
+      _ref = this.collection.models;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        model = _ref[_i];
+        _results.push(this.addPage(model));
       }
+      return _results;
     };
 
     return PagesView;
@@ -161,28 +156,22 @@
     PageView.prototype.className = 'gifdrop-selection';
 
     PageView.prototype.events = {
-      'click button': 'userRemove',
-      'keydown select': 'keydown'
+      'click button': 'clickRemove'
     };
 
     PageView.prototype.initialize = function() {
       this.listenTo(this.model, 'remove', this.remove);
-      return this.listenTo(this.model, 'select', this.selectRemoveButton);
+      return this.listenTo(this.model, 'selectRemoveButton', this.selectRemoveButton);
     };
 
     PageView.prototype.selectRemoveButton = function() {
       return this.removeButton.focus();
     };
 
-    PageView.prototype.keydown = function(e) {
-      if (e.keyCode === 13) {
-        return e.preventDefault();
-      }
-    };
-
-    PageView.prototype.userRemove = function(e) {
+    PageView.prototype.clickRemove = function(e) {
       e.preventDefault();
-      return this.model.trigger('userRemove', this.model);
+      this.model.trigger('removeMe', this.model);
+      return this.remove();
     };
 
     PageView.prototype.ready = function() {

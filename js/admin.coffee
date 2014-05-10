@@ -1,21 +1,18 @@
 $ = window.jQuery
 app = window.gifDropAdmin =
-	views: []
-
-	add: (select) -> select.clone().appendTo app.selections
 
 	init: ->
-		app.pages = new app.Pages _.map( app.pageIds, (id) -> id: parseInt( id, 10 ) )
-		app.views.pages = new app.PagesView
-			collection: app.pages
-		app.views.pages.init()
+		@pages = new @Pages _.map( @pageIds, (id) -> id: parseInt( id, 10 ) )
+		@pagesView = new @PagesView collection: @pages
+		@pagesView.init()
 
 # Page model
 class app.Page extends Backbone.Model
 
 # Pages collection
 class app.Pages extends Backbone.Collection
-	initialize: -> @listenTo @, 'userRemove', @remove
+	initialize: ->
+		@listenTo @, 'removeMe', @remove
 
 # Main view
 class app.PagesView extends wp.Backbone.View
@@ -29,7 +26,7 @@ class app.PagesView extends wp.Backbone.View
 
 	selectPrevious: (model, collection, options) ->
 		prev = collection.at _.max [options.index - 1, 0]
-		prev.trigger 'select' if prev
+		prev.trigger 'selectRemoveButton' if prev
 
 	init: ->
 		@setSubviews()
@@ -38,10 +35,9 @@ class app.PagesView extends wp.Backbone.View
 		@views.ready()
 
 	setSubviews: ->
-		unless @views.length
-			@views.set '.gifdrop-add-page', new app.PagesViewAdd
-			for model in @collection.models
-				@addPage model
+		@views.set '.gifdrop-add-page', new app.PagesViewAdd
+		@views.unset '.gifdrop-selections-wrap'
+		@addPage model for model in @collection.models
 
 # View for the add page portion
 class app.PagesViewAdd extends wp.Backbone.View
@@ -65,32 +61,30 @@ class app.PagesViewAdd extends wp.Backbone.View
 			@dropdown.val ''
 		@dropdown.focus()
 
-	ready: -> @dropdown = @$ 'select'
+	ready: ->
+		@dropdown = @$ 'select'
 
 # View for each individual page
 class app.PageView extends wp.Backbone.View
 	template: wp.template 'gifdrop-page'
 	className: 'gifdrop-selection'
 	events:
-		'click button': 'userRemove'
-		'keydown select': 'keydown'
+		'click button': 'clickRemove'
 
 	initialize: ->
 		@listenTo @model, 'remove', @remove
-		@listenTo @model, 'select', @selectRemoveButton
+		@listenTo @model, 'selectRemoveButton', @selectRemoveButton
 
 	selectRemoveButton: -> @removeButton.focus()
 
-	keydown: (e) -> e.preventDefault() if e.keyCode is 13
-
-	userRemove: (e) ->
+	clickRemove: (e) ->
 		e.preventDefault()
-		@model.trigger 'userRemove', @model
+		@model.trigger 'removeMe', @model
+		@remove()
 
 	ready: ->
 		@dropdown = @$ 'select'
 		@removeButton = @$ 'button'
 		@dropdown.val @model.id
 
-$ ->
-	app.init()
+$ -> app.init()
