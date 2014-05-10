@@ -19,10 +19,10 @@ class app.PagesView extends wp.Backbone.View
 	template: wp.template 'gifdrop-pages'
 
 	initialize: ->
-		@listenTo @collection, 'add', @addPage
+		@listenTo @collection, 'add', @addPageView
 		@listenTo @collection, 'remove', @selectPrevious
 
-	addPage: (model) -> @views.add '.gifdrop-selections-wrap', new app.PageView model: model
+	addPageView: (model) -> @views.add '.gifdrop-selections-wrap', new app.PageView model: model
 
 	selectPrevious: (model, collection, options) ->
 		prev = collection.at _.max [options.index - 1, 0]
@@ -37,7 +37,7 @@ class app.PagesView extends wp.Backbone.View
 	setSubviews: ->
 		@views.set '.gifdrop-add-page', new app.PagesViewAdd
 		@views.unset '.gifdrop-selections-wrap'
-		@addPage model for model in @collection.models
+		@addPageView model for model in @collection.models
 
 # View for the add page portion
 class app.PagesViewAdd extends wp.Backbone.View
@@ -47,7 +47,7 @@ class app.PagesViewAdd extends wp.Backbone.View
 		'click button': 'clickButton'
 
 	keydownSelect: (e) ->
-		if e.keyCode is 13
+		if e.which is 13
 			e.preventDefault()
 			@clickButton()
 
@@ -70,12 +70,16 @@ class app.PageView extends wp.Backbone.View
 	className: 'gifdrop-selection'
 	events:
 		'click button': 'clickRemove'
+		'keydown select': 'keydownSelect'
 
 	initialize: ->
 		@listenTo @model, 'remove', @remove
 		@listenTo @model, 'selectRemoveButton', @selectRemoveButton
 
 	selectRemoveButton: -> @removeButton.focus()
+
+	keydownSelect: (e) ->
+		e.preventDefault() if e.which is 13
 
 	clickRemove: (e) ->
 		e.preventDefault()

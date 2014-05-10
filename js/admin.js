@@ -57,11 +57,11 @@
     PagesView.prototype.template = wp.template('gifdrop-pages');
 
     PagesView.prototype.initialize = function() {
-      this.listenTo(this.collection, 'add', this.addPage);
+      this.listenTo(this.collection, 'add', this.addPageView);
       return this.listenTo(this.collection, 'remove', this.selectPrevious);
     };
 
-    PagesView.prototype.addPage = function(model) {
+    PagesView.prototype.addPageView = function(model) {
       return this.views.add('.gifdrop-selections-wrap', new app.PageView({
         model: model
       }));
@@ -90,7 +90,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         model = _ref[_i];
-        _results.push(this.addPage(model));
+        _results.push(this.addPageView(model));
       }
       return _results;
     };
@@ -115,7 +115,7 @@
     };
 
     PagesViewAdd.prototype.keydownSelect = function(e) {
-      if (e.keyCode === 13) {
+      if (e.which === 13) {
         e.preventDefault();
         return this.clickButton();
       }
@@ -156,7 +156,8 @@
     PageView.prototype.className = 'gifdrop-selection';
 
     PageView.prototype.events = {
-      'click button': 'clickRemove'
+      'click button': 'clickRemove',
+      'keydown select': 'keydownSelect'
     };
 
     PageView.prototype.initialize = function() {
@@ -166,6 +167,12 @@
 
     PageView.prototype.selectRemoveButton = function() {
       return this.removeButton.focus();
+    };
+
+    PageView.prototype.keydownSelect = function(e) {
+      if (e.which === 13) {
+        return e.preventDefault();
+      }
     };
 
     PageView.prototype.clickRemove = function(e) {

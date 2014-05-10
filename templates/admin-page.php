@@ -19,12 +19,14 @@ defined( 'WPINC' ) or die;
 		<?php submit_button( __('Save Changes', 'gifdrop' ), 'primary', 'submit', true ); ?>
 	</form>
 </div>
+
 <script type="text/html" id="tmpl-gifdrop-pages">
 	<p><?php _e( 'Select the pages on which GifDrop should be active:', 'gifdrop' ); ?></p>
 	<div class="gifdrop-selections-wrap"></div>
 	<hr />
 	<div class="gifdrop-add-page"></div>
 </script>
+
 <script type="text/html" id="tmpl-gifdrop-pages-add">
 <?php
 wp_dropdown_pages( array(
@@ -33,6 +35,7 @@ wp_dropdown_pages( array(
 ) ); ?> <button type="button" class="button button-secondary"><?php _e( 'add page' ); ?></button>
 <input type="hidden" name="gifdrop_js" value="enabled" />
 </script>
+
 <script type="text/html" id="tmpl-gifdrop-page">
 <?php wp_dropdown_pages( array(
 	'name' => 'gifdrop_enabled[]',
