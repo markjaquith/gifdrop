@@ -111,9 +111,31 @@ class GifDrop_Plugin {
 		exit;
 	}
 
+	protected function only_some_attachment_fields( &$attachment ) {
+		$img = wp_get_attachment_image_src( $attachment->ID, 'full' );
+		$attachment = (object) array(
+			'id' => $attachment->ID,
+			'src' => $img[0],
+			'width' => $img[1],
+			'height' => $img[2],
+		);
+	}
+
 	public function template_include( $template ) {
 		if ( is_page() ) {
 			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
+				// Register our frontend script
+				wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload' ), '0.1' );
+				$images = get_children( array(
+					'post_parent' => get_queried_object_id(),
+					'post_type'   => 'attachment',
+				));
+				array_walk( $images, array( $this, 'only_some_attachment_fields' ) );
+				wp_localize_script( 'gifdrop', 'gifdropSettings', array(
+					'id' => get_queried_object_id(),
+					'attachments' => $images,
+				));
+				wp_plupload_default_settings();
 				return $this->get_path() . '/templates/page.php';
 			}
 		}
