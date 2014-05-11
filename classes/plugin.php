@@ -13,6 +13,7 @@ class GifDrop_Plugin {
 		$this->base = dirname( dirname( __FILE__ ) );
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_filter( 'template_include', array( $this, 'template_include' ) );
 	}
 
 	public static function get_instance( $__FILE__ ) {
@@ -91,7 +92,6 @@ class GifDrop_Plugin {
 		current_user_can( 'manage_options' ) || die;
 		check_admin_referer( self::NONCE );
 		$_post = stripslashes_deep( $_POST );
-		// $doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
 
 		$pages = $this->get_page_ids();
 		$new_pages = isset( $_post['gifdrop_enabled'] ) ? array_map( 'intval', $_post['gifdrop_enabled'] ) : array();
@@ -109,6 +109,15 @@ class GifDrop_Plugin {
 
 		wp_redirect( $this->admin_url() . '&updated=true' );
 		exit;
+	}
+
+	public function template_include( $template ) {
+		if ( is_page() ) {
+			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
+				return $this->get_path() . '/templates/page.php';
+			}
+		}
+		return $template;
 	}
 
 	protected function get_page_ids() {
