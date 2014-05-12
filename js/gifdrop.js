@@ -9,20 +9,20 @@
   app = window.gifdropApp = {};
 
   $(function() {
-    var imageFormatUploadError, imageFormatUploadFilesAdded, imageFormatUploadProgress, imageFormatUploadStart, imageFormatUploadSuccess, uploader;
-    imageFormatUploadProgress = function(uploader, file) {
-      return alert('imageFormatUploadProgress');
+    var uploadError, uploadFilesAdded, uploadProgress, uploadStart, uploadSuccess, uploader;
+    uploadProgress = function(uploader, file) {
+      return console.log('uploadProgress');
     };
-    imageFormatUploadStart = function(uploader) {
-      return alert('imageFormatUploadStart');
+    uploadStart = function(uploader) {
+      return console.log('uploadStart');
     };
-    imageFormatUploadError = function() {
+    uploadError = function() {
       return alert('error');
     };
-    imageFormatUploadSuccess = function(attachment) {
+    uploadSuccess = function(attachment) {
       return console.log('attachment', attachment);
     };
-    imageFormatUploadFilesAdded = function(uploader, files) {
+    uploadFilesAdded = function(uploader, files) {
       return $.each(files, function(i, file) {
         if (i > 0) {
           return uploader.removeFile(file);
@@ -33,17 +33,13 @@
       container: $('.wrapper'),
       browser: $('.browser'),
       dropzone: $('.dropzone'),
-      success: imageFormatUploadSuccess,
-      error: imageFormatUploadError,
-      id: 1270,
-      init: function() {
-        return wp.media.model.settings.post.id = gifdropSettings.id;
+      success: uploadSuccess,
+      error: uploadError,
+      params: {
+        post_id: gifdropSettings.id
       },
       supports: {
         dragdrop: true
-      },
-      params: {
-        post_id: 1270
       },
       plupload: {
         runtimes: "html5",
@@ -56,9 +52,9 @@
       }
     });
     if (uploader.supports.dragdrop) {
-      uploader.uploader.bind("BeforeUpload", imageFormatUploadStart);
-      uploader.uploader.bind("UploadProgress", imageFormatUploadProgress);
-      uploader.uploader.bind("FilesAdded", imageFormatUploadFilesAdded);
+      uploader.uploader.bind("BeforeUpload", uploadStart);
+      uploader.uploader.bind("UploadProgress", uploadProgress);
+      uploader.uploader.bind("FilesAdded", uploadFilesAdded);
     } else {
       uploader.uploader.destroy();
       uploader = null;
