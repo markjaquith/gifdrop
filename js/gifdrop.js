@@ -110,6 +110,16 @@
 
     ImagesListView.prototype.template = wp.template('gifs');
 
+    ImagesListView.prototype.initialize = function() {
+      return this.listenTo(this.collection, 'add', this.prependView);
+    };
+
+    ImagesListView.prototype.prependView = function(model, collection, options) {
+      return this.addView(model, {
+        at: 0
+      });
+    };
+
     ImagesListView.prototype.addView = function(model, options) {
       this.views.add('.giflist', new app.ImageListView({
         model: model

@@ -66,6 +66,12 @@ class app.Images extends Backbone.Collection
 class app.ImagesListView extends wp.Backbone.View
 	template: wp.template 'gifs'
 
+	initialize: ->
+		@listenTo @collection, 'add', @prependView
+
+	prependView: (model, collection, options) ->
+		@addView model, at: 0
+
 	addView: (model, options) ->
 		@views.add '.giflist', new app.ImageListView(model: model), options
 		console.log 'addView'
