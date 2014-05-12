@@ -1,6 +1,10 @@
 $ = window.jQuery
 
-app = window.gifdropApp = {}
+app = window.gifdropApp =
+	init: ->
+		@images = new @Images _.toArray gifdropSettings.attachments
+		@view = new @ImagesListView collection: @images
+		@view.init()
 
 $ ->
 	uploadProgress = (uploader, file) ->
@@ -23,7 +27,7 @@ $ ->
 			id: attachment.id
 			width: img.width
 			height: img.height
-			url: img.url
+			src: img.url
 
 	uploadFilesAdded = (uploader, files) ->
 		$.each files, (i, file) ->
@@ -32,7 +36,7 @@ $ ->
 	uploader = new wp.Uploader
 		container: $ '.wrapper'
 		browser: $ '.browser'
-		dropzone: $ '.dropzone'
+		dropzone: $ '.wrapper'
 		success: uploadSuccess
 		error: uploadError
 		params:
@@ -54,9 +58,32 @@ $ ->
 		uploader.uploader.destroy()
 		uploader = null
 
-	app.images = new app.Images _.toArray gifdropSettings.attachments
-
 class app.Image extends Backbone.Model
 
 class app.Images extends Backbone.Collection
 	model: app.Image
+
+class app.ImagesListView extends wp.Backbone.View
+	template: wp.template 'gifs'
+
+	addView: (model, options) ->
+		@views.add '.giflist', new app.ImageListView(model: model), options
+		console.log 'addView'
+
+	addSubviews: ->
+		@addView gif for gif in @collection.models
+
+	init: ->
+		@addSubviews()
+		@render()
+		$('.gifs').html @$el
+		console.log @el
+		@views.ready()
+
+class app.ImageListView extends wp.Backbone.View
+	className: 'gif'
+	template: wp.template 'gif'
+
+	prepare: -> @model.toJSON()
+
+$ -> app.init()

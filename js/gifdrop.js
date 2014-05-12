@@ -6,7 +6,15 @@
 
   $ = window.jQuery;
 
-  app = window.gifdropApp = {};
+  app = window.gifdropApp = {
+    init: function() {
+      this.images = new this.Images(_.toArray(gifdropSettings.attachments));
+      this.view = new this.ImagesListView({
+        collection: this.images
+      });
+      return this.view.init();
+    }
+  };
 
   $(function() {
     var uploadError, uploadFilesAdded, uploadProgress, uploadStart, uploadSuccess, uploader;
@@ -27,7 +35,7 @@
         id: attachment.id,
         width: img.width,
         height: img.height,
-        url: img.url
+        src: img.url
       });
     };
     uploadFilesAdded = function(uploader, files) {
@@ -40,7 +48,7 @@
     uploader = new wp.Uploader({
       container: $('.wrapper'),
       browser: $('.browser'),
-      dropzone: $('.dropzone'),
+      dropzone: $('.wrapper'),
       success: uploadSuccess,
       error: uploadError,
       params: {
@@ -62,12 +70,11 @@
     if (uploader.supports.dragdrop) {
       uploader.uploader.bind("BeforeUpload", uploadStart);
       uploader.uploader.bind("UploadProgress", uploadProgress);
-      uploader.uploader.bind("FilesAdded", uploadFilesAdded);
+      return uploader.uploader.bind("FilesAdded", uploadFilesAdded);
     } else {
       uploader.uploader.destroy();
-      uploader = null;
+      return uploader = null;
     }
-    return app.images = new app.Images(_.toArray(gifdropSettings.attachments));
   });
 
   app.Image = (function(_super) {
@@ -93,6 +100,68 @@
     return Images;
 
   })(Backbone.Collection);
+
+  app.ImagesListView = (function(_super) {
+    __extends(ImagesListView, _super);
+
+    function ImagesListView() {
+      return ImagesListView.__super__.constructor.apply(this, arguments);
+    }
+
+    ImagesListView.prototype.template = wp.template('gifs');
+
+    ImagesListView.prototype.addView = function(model, options) {
+      this.views.add('.giflist', new app.ImageListView({
+        model: model
+      }), options);
+      return console.log('addView');
+    };
+
+    ImagesListView.prototype.addSubviews = function() {
+      var gif, _i, _len, _ref, _results;
+      _ref = this.collection.models;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        gif = _ref[_i];
+        _results.push(this.addView(gif));
+      }
+      return _results;
+    };
+
+    ImagesListView.prototype.init = function() {
+      this.addSubviews();
+      this.render();
+      $('.gifs').html(this.$el);
+      console.log(this.el);
+      return this.views.ready();
+    };
+
+    return ImagesListView;
+
+  })(wp.Backbone.View);
+
+  app.ImageListView = (function(_super) {
+    __extends(ImageListView, _super);
+
+    function ImageListView() {
+      return ImageListView.__super__.constructor.apply(this, arguments);
+    }
+
+    ImageListView.prototype.className = 'gif';
+
+    ImageListView.prototype.template = wp.template('gif');
+
+    ImageListView.prototype.prepare = function() {
+      return this.model.toJSON();
+    };
+
+    return ImageListView;
+
+  })(wp.Backbone.View);
+
+  $(function() {
+    return app.init();
+  });
 
 }).call(this);
 
