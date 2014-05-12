@@ -67,9 +67,13 @@ class app.ImagesListView extends wp.Backbone.View
 	template: wp.template 'gifs'
 
 	initialize: ->
-		@listenTo @collection, 'add', @prependView
+		@listenTo @collection, 'add', @addNew
+		@listenTo @, 'prependedView', @prependedView
 
-	prependView: (model, collection, options) ->
+	prependedView: (item) ->
+		@$gifs.isotope 'prepended', item if @$gifs.isotope
+
+	addNew: (model, collection, options) ->
 		@addView model, at: 0
 
 	addView: (model, options) ->
@@ -77,6 +81,7 @@ class app.ImagesListView extends wp.Backbone.View
 		console.log 'addView'
 
 	addSubviews: ->
+		#@views.add '.giflist', new app.ImageListSizer, at: 0
 		@addView gif for gif in @collection.models
 
 	init: ->
@@ -89,18 +94,25 @@ class app.ImagesListView extends wp.Backbone.View
 
 	ready: ->
 		@$gifs = @$ '.giflist'
+		#@$gifSizer = @$gifs.find '.gif-sizer'
 
 	masonry: ->
 		@$gifs.isotope
 			layoutMode: 'masonry'
+			itemSelector: '.gif'
 			masonry:
-				columnWidth: 504
-
+				columnWidth: 50
 
 class app.ImageListView extends wp.Backbone.View
 	className: 'gif'
 	template: wp.template 'gif'
 
 	prepare: -> @model.toJSON()
+
+	ready: ->
+		@views.parent.trigger 'prependedView', @$el
+
+class app.ImageListSizer extends wp.Backbone.View
+	className: 'gif-sizer'
 
 $ -> app.init()

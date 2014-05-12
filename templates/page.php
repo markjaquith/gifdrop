@@ -15,8 +15,10 @@
 	}
 	.gif {
 		float: left;
-		padding: 2px;
-		max-width: 400px;
+	}
+	.gif > img {
+		xmax-width: 100%;
+		display: block;
 	}
 	</style>
 </head>
@@ -27,9 +29,7 @@
 	</div>
 	<div class="browser"></div>
 <script type="text/html" id="tmpl-gif">
-<div class="gif">
 <img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" />
-</div>
 </script>
 <script type="text/html" id="tmpl-gifs">
 <div class="giflist">

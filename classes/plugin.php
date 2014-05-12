@@ -135,6 +135,7 @@ class GifDrop_Plugin {
 					'post_type'   => 'attachment',
 					'orderby' => 'date',
 					'order' => 'DESC',
+					'posts_per_page' => -1
 				));
 				array_walk( $images, array( $this, 'only_some_attachment_fields' ) );
 				wp_localize_script( 'gifdrop', 'gifdropSettings', array(

@@ -111,10 +111,17 @@
     ImagesListView.prototype.template = wp.template('gifs');
 
     ImagesListView.prototype.initialize = function() {
-      return this.listenTo(this.collection, 'add', this.prependView);
+      this.listenTo(this.collection, 'add', this.addNew);
+      return this.listenTo(this, 'prependedView', this.prependedView);
     };
 
-    ImagesListView.prototype.prependView = function(model, collection, options) {
+    ImagesListView.prototype.prependedView = function(item) {
+      if (this.$gifs.isotope) {
+        return this.$gifs.isotope('prepended', item);
+      }
+    };
+
+    ImagesListView.prototype.addNew = function(model, collection, options) {
       return this.addView(model, {
         at: 0
       });
@@ -154,8 +161,9 @@
     ImagesListView.prototype.masonry = function() {
       return this.$gifs.isotope({
         layoutMode: 'masonry',
+        itemSelector: '.gif',
         masonry: {
-          columnWidth: 504
+          columnWidth: 50
         }
       });
     };
@@ -179,7 +187,24 @@
       return this.model.toJSON();
     };
 
+    ImageListView.prototype.ready = function() {
+      return this.views.parent.trigger('prependedView', this.$el);
+    };
+
     return ImageListView;
+
+  })(wp.Backbone.View);
+
+  app.ImageListSizer = (function(_super) {
+    __extends(ImageListSizer, _super);
+
+    function ImageListSizer() {
+      return ImageListSizer.__super__.constructor.apply(this, arguments);
+    }
+
+    ImageListSizer.prototype.className = 'gif-sizer';
+
+    return ImageListSizer;
 
   })(wp.Backbone.View);
 
