@@ -20,7 +20,15 @@
       return alert('error');
     };
     uploadSuccess = function(attachment) {
-      return console.log('attachment', attachment);
+      var img;
+      console.log(attachment);
+      img = attachment.attributes.sizes.full;
+      return app.images.add({
+        id: attachment.id,
+        width: img.width,
+        height: img.height,
+        url: img.url
+      });
     };
     uploadFilesAdded = function(uploader, files) {
       return $.each(files, function(i, file) {

@@ -17,7 +17,13 @@ $ ->
 		alert 'error'
 
 	uploadSuccess = (attachment) ->
-		console.log 'attachment', attachment
+		console.log attachment
+		img = attachment.attributes.sizes.full
+		app.images.add
+			id: attachment.id
+			width: img.width
+			height: img.height
+			url: img.url
 
 	uploadFilesAdded = (uploader, files) ->
 		$.each files, (i, file) ->
