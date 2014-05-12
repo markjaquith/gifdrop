@@ -85,6 +85,17 @@ class app.ImagesListView extends wp.Backbone.View
 		$('.gifs').html @$el
 		console.log @el
 		@views.ready()
+		@masonry()
+
+	ready: ->
+		@$gifs = @$ '.giflist'
+
+	masonry: ->
+		@$gifs.isotope
+			layoutMode: 'masonry'
+			masonry:
+				columnWidth: 504
+
 
 class app.ImageListView extends wp.Backbone.View
 	className: 'gif'

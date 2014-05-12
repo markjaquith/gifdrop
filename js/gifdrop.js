@@ -143,7 +143,21 @@
       this.render();
       $('.gifs').html(this.$el);
       console.log(this.el);
-      return this.views.ready();
+      this.views.ready();
+      return this.masonry();
+    };
+
+    ImagesListView.prototype.ready = function() {
+      return this.$gifs = this.$('.giflist');
+    };
+
+    ImagesListView.prototype.masonry = function() {
+      return this.$gifs.isotope({
+        layoutMode: 'masonry',
+        masonry: {
+          columnWidth: 504
+        }
+      });
     };
 
     return ImagesListView;

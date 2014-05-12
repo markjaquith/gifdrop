@@ -13,6 +13,11 @@
 		background: #ddd;
 		position: absolute !important;
 	}
+	.gif {
+		float: left;
+		padding: 2px;
+		max-width: 400px;
+	}
 	</style>
 </head>
 <body>
@@ -23,7 +28,7 @@
 	<div class="browser"></div>
 <script type="text/html" id="tmpl-gif">
 <div class="gif">
-<img src="{{data.src}}" />
+<img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" />
 </div>
 </script>
 <script type="text/html" id="tmpl-gifs">

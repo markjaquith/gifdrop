@@ -111,6 +111,11 @@ class GifDrop_Plugin {
 		exit;
 	}
 
+	protected function register_frontend_scripts() {
+		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'js/isotope.min.js', array(), '2.0.0' );
+		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope' ), '0.1' );
+	}
+
 	protected function only_some_attachment_fields( &$attachment ) {
 		$img = wp_get_attachment_image_src( $attachment->ID, 'full' );
 		$attachment = (object) array(
@@ -124,8 +129,7 @@ class GifDrop_Plugin {
 	public function template_include( $template ) {
 		if ( is_page() ) {
 			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
-				// Register our frontend script
-				wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload' ), '0.1' );
+				$this->register_frontend_scripts();
 				$images = get_posts( array(
 					'post_parent' => get_queried_object_id(),
 					'post_type'   => 'attachment',
