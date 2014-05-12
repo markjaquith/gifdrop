@@ -126,9 +126,11 @@ class GifDrop_Plugin {
 			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
 				// Register our frontend script
 				wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload' ), '0.1' );
-				$images = get_children( array(
+				$images = get_posts( array(
 					'post_parent' => get_queried_object_id(),
 					'post_type'   => 'attachment',
+					'orderby' => 'date',
+					'order' => 'DESC',
 				));
 				array_walk( $images, array( $this, 'only_some_attachment_fields' ) );
 				wp_localize_script( 'gifdrop', 'gifdropSettings', array(
