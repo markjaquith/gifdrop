@@ -29,7 +29,7 @@
 	</div>
 	<div class="browser"></div>
 <script type="text/html" id="tmpl-gif">
-<img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" />
+<img src="{{data.static}}" width="{{data.width}}" height="{{data.height}}" />
 </script>
 <script type="text/html" id="tmpl-gifs">
 <div class="giflist">

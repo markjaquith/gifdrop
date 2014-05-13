@@ -28,14 +28,16 @@
       return alert('error');
     };
     uploadSuccess = function(attachment) {
-      var img;
+      var full, unanimated;
       console.log(attachment);
-      img = attachment.attributes.sizes.full;
+      full = attachment.attributes.sizes.full;
+      unanimated = attachment.attributes.sizes['full-gif-static'] || full;
       return app.images.add({
         id: attachment.id,
-        width: img.width,
-        height: img.height,
-        src: img.url
+        width: full.width,
+        height: full.height,
+        src: full.url,
+        "static": unanimated.url
       });
     };
     uploadFilesAdded = function(uploader, files) {
@@ -52,7 +54,8 @@
       success: uploadSuccess,
       error: uploadError,
       params: {
-        post_id: gifdropSettings.id
+        post_id: gifdropSettings.id,
+        provide_full_gif_static: true
       },
       supports: {
         dragdrop: true
@@ -110,13 +113,15 @@
 
     ImagesListView.prototype.template = wp.template('gifs');
 
+    ImagesListView.prototype.masonryEnabled = false;
+
     ImagesListView.prototype.initialize = function() {
       this.listenTo(this.collection, 'add', this.addNew);
       return this.listenTo(this, 'prependedView', this.prependedView);
     };
 
     ImagesListView.prototype.prependedView = function(item) {
-      if (this.$gifs.isotope) {
+      if (this.masonryEnabled) {
         return this.$gifs.isotope('prepended', item);
       }
     };
@@ -128,10 +133,9 @@
     };
 
     ImagesListView.prototype.addView = function(model, options) {
-      this.views.add('.giflist', new app.ImageListView({
+      return this.views.add('.giflist', new app.ImageListView({
         model: model
       }), options);
-      return console.log('addView');
     };
 
     ImagesListView.prototype.addSubviews = function() {
@@ -149,7 +153,6 @@
       this.addSubviews();
       this.render();
       $('.gifs').html(this.$el);
-      console.log(this.el);
       this.views.ready();
       return this.masonry();
     };
@@ -159,6 +162,7 @@
     };
 
     ImagesListView.prototype.masonry = function() {
+      this.masonryEnabled = true;
       return this.$gifs.isotope({
         layoutMode: 'masonry',
         itemSelector: '.gif',
@@ -183,28 +187,33 @@
 
     ImageListView.prototype.template = wp.template('gif');
 
+    ImageListView.prototype.events = {
+      'mouseover': 'mouseover',
+      'mouseout': 'mouseout'
+    };
+
     ImageListView.prototype.prepare = function() {
       return this.model.toJSON();
     };
 
+    ImageListView.prototype.mouseover = function() {
+      return this.$img.attr({
+        src: this.model.get('src')
+      });
+    };
+
+    ImageListView.prototype.mouseout = function() {
+      return this.$img.attr({
+        src: this.model.get('static')
+      });
+    };
+
     ImageListView.prototype.ready = function() {
+      this.$img = this.$('img');
       return this.views.parent.trigger('prependedView', this.$el);
     };
 
     return ImageListView;
-
-  })(wp.Backbone.View);
-
-  app.ImageListSizer = (function(_super) {
-    __extends(ImageListSizer, _super);
-
-    function ImageListSizer() {
-      return ImageListSizer.__super__.constructor.apply(this, arguments);
-    }
-
-    ImageListSizer.prototype.className = 'gif-sizer';
-
-    return ImageListSizer;
 
   })(wp.Backbone.View);
 

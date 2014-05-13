@@ -8,13 +8,11 @@ app = window.gifdropApp =
 
 $ ->
 	uploadProgress = (uploader, file) ->
-		# alert 'uploadProgress'
 		# $bar = $("#" + uploader.settings.drop_element + " .media-progress-bar div")
 		# $bar.width file.percent + "%"
 		console.log 'uploadProgress'
 
 	uploadStart = (uploader) ->
-		# alert 'uploadStart'
 		console.log 'uploadStart'
 
 	uploadError = ->
@@ -22,12 +20,14 @@ $ ->
 
 	uploadSuccess = (attachment) ->
 		console.log attachment
-		img = attachment.attributes.sizes.full
+		full = attachment.attributes.sizes.full
+		unanimated = attachment.attributes.sizes['full-gif-static'] or full
 		app.images.add
 			id: attachment.id
-			width: img.width
-			height: img.height
-			src: img.url
+			width: full.width
+			height: full.height
+			src: full.url
+			static: unanimated.url
 
 	uploadFilesAdded = (uploader, files) ->
 		$.each files, (i, file) ->
@@ -41,6 +41,7 @@ $ ->
 		error: uploadError
 		params:
 			post_id: gifdropSettings.id
+			provide_full_gif_static: yes
 		supports:
 			dragdrop: yes
 		plupload:
@@ -65,38 +66,36 @@ class app.Images extends Backbone.Collection
 
 class app.ImagesListView extends wp.Backbone.View
 	template: wp.template 'gifs'
+	masonryEnabled: no
 
 	initialize: ->
 		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'prependedView', @prependedView
 
 	prependedView: (item) ->
-		@$gifs.isotope 'prepended', item if @$gifs.isotope
+		@$gifs.isotope 'prepended', item if @masonryEnabled
 
 	addNew: (model, collection, options) ->
 		@addView model, at: 0
 
 	addView: (model, options) ->
 		@views.add '.giflist', new app.ImageListView(model: model), options
-		console.log 'addView'
 
 	addSubviews: ->
-		#@views.add '.giflist', new app.ImageListSizer, at: 0
 		@addView gif for gif in @collection.models
 
 	init: ->
 		@addSubviews()
 		@render()
 		$('.gifs').html @$el
-		console.log @el
 		@views.ready()
 		@masonry()
 
 	ready: ->
 		@$gifs = @$ '.giflist'
-		#@$gifSizer = @$gifs.find '.gif-sizer'
 
 	masonry: ->
+		@masonryEnabled = yes
 		@$gifs.isotope
 			layoutMode: 'masonry'
 			itemSelector: '.gif'
@@ -106,13 +105,18 @@ class app.ImagesListView extends wp.Backbone.View
 class app.ImageListView extends wp.Backbone.View
 	className: 'gif'
 	template: wp.template 'gif'
+	events:
+		'mouseover': 'mouseover'
+		'mouseout': 'mouseout'
 
 	prepare: -> @model.toJSON()
 
-	ready: ->
-		@views.parent.trigger 'prependedView', @$el
+	mouseover: -> @$img.attr src: @model.get 'src'
 
-class app.ImageListSizer extends wp.Backbone.View
-	className: 'gif-sizer'
+	mouseout: -> @$img.attr src: @model.get 'static'
+
+	ready: ->
+		@$img = @$ 'img'
+		@views.parent.trigger 'prependedView', @$el
 
 $ -> app.init()

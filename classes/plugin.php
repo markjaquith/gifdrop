@@ -14,6 +14,8 @@ class GifDrop_Plugin {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'metadata_filter', ), 10, 2 );
+		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
 	}
 
 	public static function get_instance( $__FILE__ ) {
@@ -117,12 +119,14 @@ class GifDrop_Plugin {
 	}
 
 	protected function only_some_attachment_fields( &$attachment ) {
-		$img = wp_get_attachment_image_src( $attachment->ID, 'full' );
+		$full = wp_get_attachment_image_src( $attachment->ID, 'full' );
+		$static = wp_get_attachment_image_src( $attachment->ID, 'full-gif-static' );
 		$attachment = (object) array(
 			'id' => $attachment->ID,
-			'src' => $img[0],
-			'width' => $img[1],
-			'height' => $img[2],
+			'src' => $full[0],
+			'static' => $static ? $static[0] : $full[0],
+			'width' => $full[1],
+			'height' => $full[2],
 		);
 	}
 
@@ -167,4 +171,29 @@ class GifDrop_Plugin {
 		}
 		return $pages_out;
 	}
+
+	public function metadata_filter( $metadata, $attachment_id ) {
+		if ( 'image/gif' === get_post_mime_type( $attachment_id ) ) {
+			$file = get_attached_file( $attachment_id );
+			$editor = wp_get_image_editor( $file );
+			if ( ! is_wp_error( $editor ) ) {
+				// Flip the image twice
+				// The first flip flips the images and boils it down to the first gif frame
+				// The second flip restores it to its original orientation
+				$editor->flip( true, false );
+				$editor->flip( true, false );
+				$gif_static_metadata = $editor->save();
+				$metadata['sizes']['full-gif-static'] = $gif_static_metadata;
+			}
+		}
+		return $metadata;
+	}
+
+	public function image_size_names_choose( $sizes ) {
+		if ( isset( $_POST['provide_full_gif_static'] ) ) {
+			$sizes['full-gif-static'] = __( 'Full Size (non-animated)', 'gifdrop' );
+		}
+		return $sizes;
+	}
+
 }
