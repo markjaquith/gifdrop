@@ -172,7 +172,7 @@
     ImagesListView.prototype.init = function() {
       this.addSubviews();
       this.render();
-      $('.gifs').html(this.$el);
+      $('.gifs').replaceWith(this.el);
       this.views.ready();
       return this.masonry();
     };

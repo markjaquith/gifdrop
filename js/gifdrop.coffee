@@ -93,7 +93,7 @@ class app.ImagesListView extends app.View
 	init: ->
 		@addSubviews()
 		@render()
-		$('.gifs').html @$el
+		$('.gifs').replaceWith @el
 		@views.ready()
 		@masonry()
 
