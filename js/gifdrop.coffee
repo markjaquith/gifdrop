@@ -59,12 +59,18 @@ $ ->
 		uploader.uploader.destroy()
 		uploader = null
 
+class app.View extends wp.Backbone.View
+	render: ->
+		result = super
+		@postRender?()
+		result
+
 class app.Image extends Backbone.Model
 
 class app.Images extends Backbone.Collection
 	model: app.Image
 
-class app.ImagesListView extends wp.Backbone.View
+class app.ImagesListView extends app.View
 	template: wp.template 'gifs'
 	masonryEnabled: no
 
@@ -91,7 +97,7 @@ class app.ImagesListView extends wp.Backbone.View
 		@views.ready()
 		@masonry()
 
-	ready: ->
+	postRender: ->
 		@$gifs = @$ '.giflist'
 
 	masonry: ->
@@ -102,7 +108,7 @@ class app.ImagesListView extends wp.Backbone.View
 			masonry:
 				columnWidth: 50
 
-class app.ImageListView extends wp.Backbone.View
+class app.ImageListView extends app.View
 	className: 'gif'
 	template: wp.template 'gif'
 	events:
@@ -115,8 +121,8 @@ class app.ImageListView extends wp.Backbone.View
 
 	mouseout: -> @$img.attr src: @model.get 'static'
 
-	ready: ->
+	postRender: ->
 		@$img = @$ 'img'
-		@views.parent.trigger 'prependedView', @$el
+		@views.parent.trigger 'prependedView', @$el # I don't think this should be here ~ Mark
 
 $ -> app.init()

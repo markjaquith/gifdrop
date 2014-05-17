@@ -80,6 +80,26 @@
     }
   });
 
+  app.View = (function(_super) {
+    __extends(View, _super);
+
+    function View() {
+      return View.__super__.constructor.apply(this, arguments);
+    }
+
+    View.prototype.render = function() {
+      var result;
+      result = View.__super__.render.apply(this, arguments);
+      if (typeof this.postRender === "function") {
+        this.postRender();
+      }
+      return result;
+    };
+
+    return View;
+
+  })(wp.Backbone.View);
+
   app.Image = (function(_super) {
     __extends(Image, _super);
 
@@ -157,7 +177,7 @@
       return this.masonry();
     };
 
-    ImagesListView.prototype.ready = function() {
+    ImagesListView.prototype.postRender = function() {
       return this.$gifs = this.$('.giflist');
     };
 
@@ -174,7 +194,7 @@
 
     return ImagesListView;
 
-  })(wp.Backbone.View);
+  })(app.View);
 
   app.ImageListView = (function(_super) {
     __extends(ImageListView, _super);
@@ -208,14 +228,14 @@
       });
     };
 
-    ImageListView.prototype.ready = function() {
+    ImageListView.prototype.postRender = function() {
       this.$img = this.$('img');
       return this.views.parent.trigger('prependedView', this.$el);
     };
 
     return ImageListView;
 
-  })(wp.Backbone.View);
+  })(app.View);
 
   $(function() {
     return app.init();
