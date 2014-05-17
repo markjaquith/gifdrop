@@ -22,12 +22,13 @@ $ ->
 		console.log attachment
 		full = attachment.attributes.sizes.full
 		unanimated = attachment.attributes.sizes['full-gif-static'] or full
-		app.images.add
+		gif =
 			id: attachment.id
 			width: full.width
 			height: full.height
 			src: full.url
 			static: unanimated.url
+		app.images.add gif, at: 0
 
 	uploadFilesAdded = (uploader, files) ->
 		$.each files, (i, file) ->
@@ -70,25 +71,36 @@ class app.Image extends Backbone.Model
 class app.Images extends Backbone.Collection
 	model: app.Image
 
+class app.ImageNavView extends app.View
+	template: wp.template 'nav'
+
+
 class app.ImagesListView extends app.View
 	template: wp.template 'gifs'
 	masonryEnabled: no
 
 	initialize: ->
 		@listenTo @collection, 'add', @addNew
-		@listenTo @, 'prependedView', @prependedView
+		@listenTo @, 'newView', @animateItemIn
 
-	prependedView: (item) ->
-		@$gifs.isotope 'prepended', item if @masonryEnabled
+	animateItemIn: (model, $item) ->
+		position = @collection.indexOf model
+		max = @collection.length - 1
+		if @masonryEnabled
+			switch position
+				when 0 then @$gifs.isotope 'prepended', $item
+				when max then @$gifs.isotope 'appended', $item
+				else @$gifs.isotope('reloadItems').isotope()
 
 	addNew: (model, collection, options) ->
-		@addView model, at: 0
+		@addView model, at: options?.at
 
 	addView: (model, options) ->
 		view = new app.ImageListView model: model
 		@views.add '.giflist', view, options
 
 	setSubviews: ->
+		@views.set '.gifnav', new app.ImageNavView collection: @collection
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
 		@views.set '.giflist', gifViews
 
@@ -107,6 +119,7 @@ class app.ImagesListView extends app.View
 		@$gifs.isotope
 			layoutMode: 'masonry'
 			itemSelector: '.gif'
+			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
 				columnWidth: 50
 
@@ -125,6 +138,8 @@ class app.ImageListView extends app.View
 
 	postRender: ->
 		@$img = @$ 'img'
-		@views.parent.trigger 'prependedView', @$el # I don't think this should be here ~ Mark
+
+	ready: ->
+		@views.parent.trigger 'newView', @model, @$el
 
 $ -> app.init()

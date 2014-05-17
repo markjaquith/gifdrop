@@ -28,16 +28,19 @@
       return alert('error');
     };
     uploadSuccess = function(attachment) {
-      var full, unanimated;
+      var full, gif, unanimated;
       console.log(attachment);
       full = attachment.attributes.sizes.full;
       unanimated = attachment.attributes.sizes['full-gif-static'] || full;
-      return app.images.add({
+      gif = {
         id: attachment.id,
         width: full.width,
         height: full.height,
         src: full.url,
         "static": unanimated.url
+      };
+      return app.images.add(gif, {
+        at: 0
       });
     };
     uploadFilesAdded = function(uploader, files) {
@@ -124,6 +127,19 @@
 
   })(Backbone.Collection);
 
+  app.ImageNavView = (function(_super) {
+    __extends(ImageNavView, _super);
+
+    function ImageNavView() {
+      return ImageNavView.__super__.constructor.apply(this, arguments);
+    }
+
+    ImageNavView.prototype.template = wp.template('nav');
+
+    return ImageNavView;
+
+  })(app.View);
+
   app.ImagesListView = (function(_super) {
     __extends(ImagesListView, _super);
 
@@ -137,18 +153,28 @@
 
     ImagesListView.prototype.initialize = function() {
       this.listenTo(this.collection, 'add', this.addNew);
-      return this.listenTo(this, 'prependedView', this.prependedView);
+      return this.listenTo(this, 'newView', this.animateItemIn);
     };
 
-    ImagesListView.prototype.prependedView = function(item) {
+    ImagesListView.prototype.animateItemIn = function(model, $item) {
+      var max, position;
+      position = this.collection.indexOf(model);
+      max = this.collection.length - 1;
       if (this.masonryEnabled) {
-        return this.$gifs.isotope('prepended', item);
+        switch (position) {
+          case 0:
+            return this.$gifs.isotope('prepended', $item);
+          case max:
+            return this.$gifs.isotope('appended', $item);
+          default:
+            return this.$gifs.isotope('reloadItems').isotope();
+        }
       }
     };
 
     ImagesListView.prototype.addNew = function(model, collection, options) {
       return this.addView(model, {
-        at: 0
+        at: options != null ? options.at : void 0
       });
     };
 
@@ -162,6 +188,9 @@
 
     ImagesListView.prototype.setSubviews = function() {
       var gifViews;
+      this.views.set('.gifnav', new app.ImageNavView({
+        collection: this.collection
+      }));
       gifViews = _.map(this.collection.models, function(gif) {
         return new app.ImageListView({
           model: gif
@@ -187,6 +216,7 @@
       return this.$gifs.isotope({
         layoutMode: 'masonry',
         itemSelector: '.gif',
+        sortBy: 'original-order',
         masonry: {
           columnWidth: 50
         }
@@ -230,8 +260,11 @@
     };
 
     ImageListView.prototype.postRender = function() {
-      this.$img = this.$('img');
-      return this.views.parent.trigger('prependedView', this.$el);
+      return this.$img = this.$('img');
+    };
+
+    ImageListView.prototype.ready = function() {
+      return this.views.parent.trigger('newView', this.model, this.$el);
     };
 
     return ImageListView;
