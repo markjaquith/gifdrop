@@ -74,7 +74,6 @@ class app.Images extends Backbone.Collection
 class app.ImageNavView extends app.View
 	template: wp.template 'nav'
 
-
 class app.ImagesListView extends app.View
 	template: wp.template 'gifs'
 	masonryEnabled: no

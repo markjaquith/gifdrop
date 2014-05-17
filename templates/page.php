@@ -20,6 +20,17 @@
 		xmax-width: 100%;
 		display: block;
 	}
+	.gifnav {
+		position: fixed;
+		height: 30px;
+		top: 0;
+		z-index: 1;
+		background: #fff;
+		width: 100%;
+	}
+	.giflist {
+		margin-top: 30px;
+	}
 	</style>
 </head>
 <body>
@@ -32,8 +43,13 @@
 <img src="{{data.static}}" width="{{data.width}}" height="{{data.height}}" />
 </script>
 <script type="text/html" id="tmpl-gifs">
-<div class="giflist">
-</div>
-</scripts>
+<div class="gifnav"></div>
+<div class="giflist"></div>
+</script>
+
+<script type="text/html" id="tmpl-nav">
+NAV BAR GOES HERE
+</script>
+
 </body>
 </html>
