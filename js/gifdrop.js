@@ -153,24 +153,25 @@
     };
 
     ImagesListView.prototype.addView = function(model, options) {
-      return this.views.add('.giflist', new app.ImageListView({
+      var view;
+      view = new app.ImageListView({
         model: model
-      }), options);
+      });
+      return this.views.add('.giflist', view, options);
     };
 
-    ImagesListView.prototype.addSubviews = function() {
-      var gif, _i, _len, _ref, _results;
-      _ref = this.collection.models;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        gif = _ref[_i];
-        _results.push(this.addView(gif));
-      }
-      return _results;
+    ImagesListView.prototype.setSubviews = function() {
+      var gifViews;
+      gifViews = _.map(this.collection.models, function(gif) {
+        return new app.ImageListView({
+          model: gif
+        });
+      });
+      return this.views.set('.giflist', gifViews);
     };
 
     ImagesListView.prototype.init = function() {
-      this.addSubviews();
+      this.setSubviews();
       this.render();
       $('.gifs').replaceWith(this.el);
       this.views.ready();

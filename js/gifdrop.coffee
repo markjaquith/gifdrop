@@ -85,13 +85,15 @@ class app.ImagesListView extends app.View
 		@addView model, at: 0
 
 	addView: (model, options) ->
-		@views.add '.giflist', new app.ImageListView(model: model), options
+		view = new app.ImageListView model: model
+		@views.add '.giflist', view, options
 
-	addSubviews: ->
-		@addView gif for gif in @collection.models
+	setSubviews: ->
+		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
+		@views.set '.giflist', gifViews
 
 	init: ->
-		@addSubviews()
+		@setSubviews()
 		@render()
 		$('.gifs').replaceWith @el
 		@views.ready()
