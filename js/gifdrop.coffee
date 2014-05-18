@@ -187,6 +187,7 @@ class app.ImageListView extends app.View
 			padding: 0
 			'z-index': 'auto'
 
+
 	postRender: ->
 		@crop()
 		@$img = @$ '> img'
