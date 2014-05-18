@@ -63,6 +63,29 @@ app = window.gifdropApp =
 			uploader.uploader.destroy()
 			uploader = null
 
+	ratios: [
+		1/4
+		1/3
+		1/2
+		2/3
+		3/4
+		1
+		4/3
+		3/2
+		2
+		3
+		4
+	]
+
+	restrictRatio: (w, h) ->
+		a = Math.abs
+		ratio = w/h
+		index = _.sortedIndex @ratios, ratio
+		before = @ratios[_.max [index - 1, 0]]
+		after = @ratios[index]
+		newRatio = if a(ratio - before) > a(ratio - after) then after else before
+		if newRatio > ratio then [w, w/newRatio] else [h * newRatio, h]
+
 class app.View extends wp.Backbone.View
 	render: ->
 		result = super

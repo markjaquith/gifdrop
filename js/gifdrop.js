@@ -82,6 +82,21 @@
         uploader.uploader.destroy();
         return uploader = null;
       }
+    },
+    ratios: [1 / 4, 1 / 3, 1 / 2, 2 / 3, 3 / 4, 1, 4 / 3, 3 / 2, 2, 3, 4],
+    restrictRatio: function(w, h) {
+      var a, after, before, index, newRatio, ratio;
+      a = Math.abs;
+      ratio = w / h;
+      index = _.sortedIndex(this.ratios, ratio);
+      before = this.ratios[_.max([index - 1, 0])];
+      after = this.ratios[index];
+      newRatio = a(ratio - before) > a(ratio - after) ? after : before;
+      if (newRatio > ratio) {
+        return [w, w / newRatio];
+      } else {
+        return [h * newRatio, h];
+      }
     }
   };
 
