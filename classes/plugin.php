@@ -118,6 +118,10 @@ class GifDrop_Plugin {
 		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope' ), '0.1' );
 	}
 
+	protected function register_frontend_styles() {
+		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array(), '0.1' );
+	}
+
 	protected function only_some_attachment_fields( &$attachment ) {
 		$full = wp_get_attachment_image_src( $attachment->ID, 'full' );
 		$static = wp_get_attachment_image_src( $attachment->ID, 'full-gif-static' );
@@ -134,6 +138,7 @@ class GifDrop_Plugin {
 		if ( is_page() ) {
 			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
 				$this->register_frontend_scripts();
+				$this->register_frontend_styles();
 				$images = get_posts( array(
 					'post_parent' => get_queried_object_id(),
 					'post_type'   => 'attachment',

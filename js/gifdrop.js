@@ -20,8 +20,9 @@
     },
     initUploads: function() {
       var uploadError, uploadFilesAdded, uploadProgress, uploadStart, uploadSuccess, uploader;
-      uploadProgress = function(uploader, file) {};
-      console.log('uploadProgress');
+      uploadProgress = function(uploader, file) {
+        return console.log('uploadProgress');
+      };
       uploadStart = function(uploader) {
         return console.log('uploadStart');
       };
@@ -83,20 +84,24 @@
         return uploader = null;
       }
     },
-    ratios: [1 / 4, 1 / 3, 1 / 2, 2 / 3, 3 / 4, 1, 4 / 3, 3 / 2, 2, 3, 4],
-    restrictRatio: function(w, h) {
-      var a, after, before, index, newRatio, ratio;
-      a = Math.abs;
-      ratio = w / h;
-      index = _.sortedIndex(this.ratios, ratio);
-      before = this.ratios[_.max([index - 1, 0])];
-      after = this.ratios[index];
-      newRatio = a(ratio - before) > a(ratio - after) ? after : before;
-      if (newRatio > ratio) {
-        return [w, w / newRatio];
-      } else {
-        return [h * newRatio, h];
+    ratios: [.5, 1, 1.5],
+    ratioHeight: function(w, h) {
+      var myRatio, ratio, _i, _len, _ref;
+      myRatio = h / w;
+      _ref = this.ratios.sort(function(a, b) {
+        return b - a;
+      });
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        ratio = _ref[_i];
+        if (ratio < myRatio) {
+          return w * ratio;
+        }
       }
+    },
+    fitTo: function(w, h, newWidth) {
+      var ratio;
+      ratio = h / w;
+      return [newWidth, Math.floor(newWidth * ratio)];
     }
   };
 
@@ -139,6 +144,16 @@
     function Image() {
       return Image.__super__.constructor.apply(this, arguments);
     }
+
+    Image.prototype.initialize = function() {
+      var height, width, _ref;
+      _ref = app.fitTo(this.get('width'), this.get('height'), 320), width = _ref[0], height = _ref[1];
+      return this.set({
+        imgWidth: width,
+        divHeight: app.ratioHeight(width, height),
+        imgHeight: height
+      });
+    };
 
     return Image;
 
@@ -268,7 +283,8 @@
         itemSelector: '.gif',
         sortBy: 'original-order',
         masonry: {
-          columnWidth: 50
+          columnWidth: 320,
+          gutter: 0
         }
       });
     };
@@ -298,18 +314,47 @@
     };
 
     ImageListView.prototype.mouseover = function() {
-      return this.$img.attr({
+      this.$img.attr({
         src: this.model.get('src')
       });
+      return this.unCrop();
     };
 
     ImageListView.prototype.mouseout = function() {
-      return this.$img.attr({
+      this.$img.attr({
         src: this.model.get('static')
+      });
+      return this.crop();
+    };
+
+    ImageListView.prototype.unCrop = function() {
+      var css, difference, newWidth, ratio;
+      if (this.model.get('imgHeight') - this.model.get('divHeight') <= 50) {
+        css = {
+          height: "" + (this.model.get('imgHeight')) + "px",
+          'z-index': 1
+        };
+      } else {
+        ratio = this.model.get('imgWidth') / this.model.get('imgHeight');
+        newWidth = this.model.get('divHeight') * ratio;
+        difference = this.model.get('imgWidth') - newWidth;
+        css = {
+          padding: "0 " + (difference / 2) + "px"
+        };
+      }
+      return this.$el.css(css);
+    };
+
+    ImageListView.prototype.crop = function() {
+      return this.$el.css({
+        height: "" + (this.model.get('divHeight')) + "px",
+        padding: 0,
+        'z-index': 'auto'
       });
     };
 
     ImageListView.prototype.postRender = function() {
+      this.crop();
       return this.$img = this.$('> img');
     };
 

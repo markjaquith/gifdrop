@@ -11,9 +11,9 @@ app = window.gifdropApp =
 
 	initUploads: ->
 		uploadProgress = (uploader, file) ->
-		# $bar = $("#" + uploader.settings.drop_element + " .media-progress-bar div")
-		# $bar.width file.percent + "%"
-		console.log 'uploadProgress'
+			# $bar = $("#" + uploader.settings.drop_element + " .media-progress-bar div")
+			# $bar.width file.percent + "%"
+			console.log 'uploadProgress'
 
 		uploadStart = (uploader) ->
 			console.log 'uploadStart'
@@ -64,27 +64,19 @@ app = window.gifdropApp =
 			uploader = null
 
 	ratios: [
-		1/4
-		1/3
-		1/2
-		2/3
-		3/4
+		.5
 		1
-		4/3
-		3/2
-		2
-		3
-		4
+		1.5
 	]
 
-	restrictRatio: (w, h) ->
-		a = Math.abs
-		ratio = w/h
-		index = _.sortedIndex @ratios, ratio
-		before = @ratios[_.max [index - 1, 0]]
-		after = @ratios[index]
-		newRatio = if a(ratio - before) > a(ratio - after) then after else before
-		if newRatio > ratio then [w, w/newRatio] else [h * newRatio, h]
+	ratioHeight: (w, h) ->
+		myRatio = h/w
+		for ratio in @ratios.sort((a, b) -> b - a)
+			return w * ratio if ratio < myRatio
+
+	fitTo: (w, h, newWidth) ->
+		ratio = h / w
+		[newWidth, Math.floor(newWidth * ratio)]
 
 class app.View extends wp.Backbone.View
 	render: ->
@@ -96,6 +88,12 @@ class app.BrowserView extends wp.Backbone.View
 	className: 'browser'
 
 class app.Image extends Backbone.Model
+	initialize: ->
+		[width, height] = app.fitTo @get('width'), @get('height'), 320
+		@set
+			imgWidth: width
+			divHeight: app.ratioHeight width, height
+			imgHeight: height
 
 class app.Images extends Backbone.Collection
 	model: app.Image
@@ -149,7 +147,8 @@ class app.ImagesListView extends app.View
 			itemSelector: '.gif'
 			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
-				columnWidth: 50
+				columnWidth: 320
+				gutter: 0
 
 class app.ImageListView extends app.View
 	className: 'gif'
@@ -160,11 +159,36 @@ class app.ImageListView extends app.View
 
 	prepare: -> @model.toJSON()
 
-	mouseover: -> @$img.attr src: @model.get 'src'
+	mouseover: ->
+		@$img.attr src: @model.get 'src'
+		@unCrop()
 
-	mouseout: -> @$img.attr src: @model.get 'static'
+	mouseout: ->
+		@$img.attr src: @model.get 'static'
+		@crop()
+
+	unCrop: ->
+		if @model.get('imgHeight') - @model.get('divHeight') <= 50
+			# It's 50 or fewer pixels taller, just let it overlap the image under it
+			css =
+				height: "#{@model.get 'imgHeight'}px"
+				'z-index': 1
+		else
+			# Restrict width to the width that will allow full height to show inside existing box
+			ratio = @model.get('imgWidth') / @model.get('imgHeight')
+			newWidth = @model.get('divHeight') * ratio
+			difference = @model.get('imgWidth') - newWidth
+			css = padding: "0 #{difference/2}px"
+		@$el.css css
+
+	crop: ->
+		@$el.css
+			height: "#{@model.get 'divHeight'}px"
+			padding: 0
+			'z-index': 'auto'
 
 	postRender: ->
+		@crop()
 		@$img = @$ '> img'
 
 	ready: ->
