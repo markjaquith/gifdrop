@@ -2,7 +2,8 @@
 (function() {
   var $, app,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   $ = window.jQuery;
 
@@ -183,6 +184,7 @@
     __extends(ImagesListView, _super);
 
     function ImagesListView() {
+      this.masonry = __bind(this.masonry, this);
       return ImagesListView.__super__.constructor.apply(this, arguments);
     }
 
@@ -237,17 +239,21 @@
     };
 
     ImagesListView.prototype.ready = function() {
-      return this.masonry();
+      return $((function(_this) {
+        return function() {
+          return _this.masonry();
+        };
+      })(this));
     };
 
     ImagesListView.prototype.masonry = function() {
       this.masonryEnabled = true;
       return this.$el.isotope({
-        layoutMode: 'fitRows',
+        layoutMode: 'masonry',
         itemSelector: '.gif',
         sortBy: 'original-order',
         masonry: {
-          columnWidth: 600
+          columnWidth: 50
         }
       });
     };

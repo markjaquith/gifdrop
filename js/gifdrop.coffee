@@ -117,18 +117,16 @@ class app.ImagesListView extends app.View
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
 		@views.set gifViews
 
-	ready: ->
-		@masonry()
+	ready: -> $ => @masonry()
 
-	masonry: ->
+	masonry: =>
 		@masonryEnabled = yes
 		@$el.isotope
-			#layoutMode: 'masonry'
-			layoutMode: 'fitRows'
+			layoutMode: 'masonry'
 			itemSelector: '.gif'
 			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
-				columnWidth: 600
+				columnWidth: 50
 
 class app.ImageListView extends app.View
 	className: 'gif'
