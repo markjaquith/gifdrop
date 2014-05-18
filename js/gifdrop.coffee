@@ -154,6 +154,7 @@ class app.ImageListView extends app.View
 	events:
 		'mouseover': 'mouseover'
 		'mouseout': 'mouseout'
+		'click': 'click'
 
 	prepare: -> @model.toJSON()
 
@@ -164,6 +165,14 @@ class app.ImageListView extends app.View
 	mouseout: ->
 		@$img.attr src: @model.get 'static'
 		@restoreCrop()
+
+	click: ->
+		singleView = new app.SingleView model: @model
+		singleView.render()
+		modal = $ '#modal'
+		modal.html singleView.el
+		singleView.views.ready()
+		modal.show()
 
 	unCrop: ->
 		if @model.get('imgHeight') isnt @model.get('divHeight')
@@ -188,5 +197,10 @@ class app.ImageListView extends app.View
 
 	ready: ->
 		@views.parent.trigger 'newView', @model, @$el
+
+class app.SingleView extends app.View
+	template: wp.template 'single'
+
+	prepare: -> @model.toJSON()
 
 $ -> app.init()

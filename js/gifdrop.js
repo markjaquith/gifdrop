@@ -300,7 +300,8 @@
 
     ImageListView.prototype.events = {
       'mouseover': 'mouseover',
-      'mouseout': 'mouseout'
+      'mouseout': 'mouseout',
+      'click': 'click'
     };
 
     ImageListView.prototype.prepare = function() {
@@ -319,6 +320,18 @@
         src: this.model.get('static')
       });
       return this.restoreCrop();
+    };
+
+    ImageListView.prototype.click = function() {
+      var modal, singleView;
+      singleView = new app.SingleView({
+        model: this.model
+      });
+      singleView.render();
+      modal = $('#modal');
+      modal.html(singleView.el);
+      singleView.views.ready();
+      return modal.show();
     };
 
     ImageListView.prototype.unCrop = function() {
@@ -358,6 +371,23 @@
     };
 
     return ImageListView;
+
+  })(app.View);
+
+  app.SingleView = (function(_super) {
+    __extends(SingleView, _super);
+
+    function SingleView() {
+      return SingleView.__super__.constructor.apply(this, arguments);
+    }
+
+    SingleView.prototype.template = wp.template('single');
+
+    SingleView.prototype.prepare = function() {
+      return this.model.toJSON();
+    };
+
+    return SingleView;
 
   })(app.View);
 

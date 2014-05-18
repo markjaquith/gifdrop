@@ -18,8 +18,14 @@
 
 <script type="text/html" id="tmpl-nav">
 <h1><?php _e( 'GifDrop', 'gifdrop' ); ?></h1>
-
 <input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
 </script>
+
+<script type="text/html" id="tmpl-single">
+<div class="modal-content">
+	<img src="{{data.src}}" />
+</div>
+</script>
+<div id="modal"><b>MODAL CONTENT</b></div>
 </body>
 </html>
