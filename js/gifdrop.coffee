@@ -3,62 +3,65 @@ $ = window.jQuery
 app = window.gifdropApp =
 	init: ->
 		@images = new @Images _.toArray gifdropSettings.attachments
-		@view = new @ImagesListView collection: @images
-		@view.init()
+		@view = new @MainView collection: @images
+		@view.render()
+		$('.outer-wrapper').html @view.el
+		@view.views.ready()
+		@initUploads()
 
-$ ->
-	uploadProgress = (uploader, file) ->
+	initUploads: ->
+		uploadProgress = (uploader, file) ->
 		# $bar = $("#" + uploader.settings.drop_element + " .media-progress-bar div")
 		# $bar.width file.percent + "%"
 		console.log 'uploadProgress'
 
-	uploadStart = (uploader) ->
-		console.log 'uploadStart'
+		uploadStart = (uploader) ->
+			console.log 'uploadStart'
 
-	uploadError = ->
-		alert 'error'
+		uploadError = ->
+			alert 'error'
 
-	uploadSuccess = (attachment) ->
-		console.log attachment
-		full = attachment.attributes.sizes.full
-		unanimated = attachment.attributes.sizes['full-gif-static'] or full
-		gif =
-			id: attachment.id
-			width: full.width
-			height: full.height
-			src: full.url
-			static: unanimated.url
-		app.images.add gif, at: 0
+		uploadSuccess = (attachment) ->
+			console.log attachment
+			full = attachment.attributes.sizes.full
+			unanimated = attachment.attributes.sizes['full-gif-static'] or full
+			gif =
+				id: attachment.id
+				width: full.width
+				height: full.height
+				src: full.url
+				static: unanimated.url
+			app.images.add gif, at: 0
 
-	uploadFilesAdded = (uploader, files) ->
-		$.each files, (i, file) ->
-			uploader.removeFile file  if i > 0
+		uploadFilesAdded = (uploader, files) ->
+			$.each files, (i, file) ->
+				uploader.removeFile file  if i > 0
 
-	uploader = new wp.Uploader
-		container: $ '.wrapper'
-		browser: $ '.browser'
-		dropzone: $ '.wrapper'
-		success: uploadSuccess
-		error: uploadError
-		params:
-			post_id: gifdropSettings.id
-			provide_full_gif_static: yes
-		supports:
-			dragdrop: yes
-		plupload:
-			runtimes: "html5"
-			filters: [
-				title: "Image"
-				extensions: "jpg,jpeg,gif,png"
-			]
+		uploader = new wp.Uploader
+			container: $ '.outer-wrapper'
+			browser: $ '.browser'
+			dropzone: $ '.outer-wrapper'
+			success: uploadSuccess
+			error: uploadError
+			params:
+				post_id: gifdropSettings.id
+				provide_full_gif_static: yes
+			supports:
+				dragdrop: yes
+			plupload:
+				runtimes: "html5"
+				filters: [
+					title: "Image"
+					extensions: "jpg,jpeg,gif,png"
+				]
 
-	if uploader.supports.dragdrop
-		uploader.uploader.bind "BeforeUpload", uploadStart
-		uploader.uploader.bind "UploadProgress", uploadProgress
-		uploader.uploader.bind "FilesAdded", uploadFilesAdded
-	else
-		uploader.uploader.destroy()
-		uploader = null
+		if uploader.supports.dragdrop
+			uploader.uploader.bind "BeforeUpload", uploadStart
+			uploader.uploader.bind "UploadProgress", uploadProgress
+			uploader.uploader.bind "FilesAdded", uploadFilesAdded
+		else
+			uploader.uploader.destroy()
+			uploader = null
 
 class app.View extends wp.Backbone.View
 	render: ->
@@ -66,19 +69,31 @@ class app.View extends wp.Backbone.View
 		@postRender?()
 		result
 
+class app.BrowserView extends wp.Backbone.View
+	className: 'browser'
+
 class app.Image extends Backbone.Model
 
 class app.Images extends Backbone.Collection
 	model: app.Image
 
+class app.MainView extends app.View
+	className: 'wrapper'
+	initialize: ->
+		@views.add new app.ImageNavView collection: @collection
+		@views.add new app.ImagesListView collection: @collection
+		@views.add new app.BrowserView
+
 class app.ImageNavView extends app.View
+	className: 'nav'
 	template: wp.template 'nav'
 
 class app.ImagesListView extends app.View
-	template: wp.template 'gifs'
+	className: 'gifs'
 	masonryEnabled: no
 
 	initialize: ->
+		@setSubviews()
 		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
 
@@ -87,40 +102,33 @@ class app.ImagesListView extends app.View
 		max = @collection.length - 1
 		if @masonryEnabled
 			switch position
-				when 0 then @$gifs.isotope 'prepended', $item
-				when max then @$gifs.isotope 'appended', $item
-				else @$gifs.isotope('reloadItems').isotope()
+				when 0 then @$el.isotope 'prepended', $item
+				when max then @$el.isotope 'appended', $item
+				else @$el.isotope('reloadItems').isotope()
 
 	addNew: (model, collection, options) ->
 		@addView model, at: options?.at
 
 	addView: (model, options) ->
 		view = new app.ImageListView model: model
-		@views.add '.giflist', view, options
+		@views.add view, options
 
 	setSubviews: ->
-		@views.set '.gifnav', new app.ImageNavView collection: @collection
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
-		@views.set '.giflist', gifViews
+		@views.set gifViews
 
-	init: ->
-		@setSubviews()
-		@render()
-		$('.gifs').replaceWith @el
-		@views.ready()
+	ready: ->
 		@masonry()
-
-	postRender: ->
-		@$gifs = @$ '.giflist'
 
 	masonry: ->
 		@masonryEnabled = yes
-		@$gifs.isotope
-			layoutMode: 'masonry'
+		@$el.isotope
+			#layoutMode: 'masonry'
+			layoutMode: 'fitRows'
 			itemSelector: '.gif'
 			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
-				columnWidth: 50
+				columnWidth: 600
 
 class app.ImageListView extends app.View
 	className: 'gif'
@@ -136,7 +144,7 @@ class app.ImageListView extends app.View
 	mouseout: -> @$img.attr src: @model.get 'static'
 
 	postRender: ->
-		@$img = @$ 'img'
+		@$img = @$ '> img'
 
 	ready: ->
 		@views.parent.trigger 'newView', @model, @$el

@@ -9,79 +9,80 @@
   app = window.gifdropApp = {
     init: function() {
       this.images = new this.Images(_.toArray(gifdropSettings.attachments));
-      this.view = new this.ImagesListView({
+      this.view = new this.MainView({
         collection: this.images
       });
-      return this.view.init();
-    }
-  };
-
-  $(function() {
-    var uploadError, uploadFilesAdded, uploadProgress, uploadStart, uploadSuccess, uploader;
-    uploadProgress = function(uploader, file) {
-      return console.log('uploadProgress');
-    };
-    uploadStart = function(uploader) {
-      return console.log('uploadStart');
-    };
-    uploadError = function() {
-      return alert('error');
-    };
-    uploadSuccess = function(attachment) {
-      var full, gif, unanimated;
-      console.log(attachment);
-      full = attachment.attributes.sizes.full;
-      unanimated = attachment.attributes.sizes['full-gif-static'] || full;
-      gif = {
-        id: attachment.id,
-        width: full.width,
-        height: full.height,
-        src: full.url,
-        "static": unanimated.url
+      this.view.render();
+      $('.outer-wrapper').html(this.view.el);
+      this.view.views.ready();
+      return this.initUploads();
+    },
+    initUploads: function() {
+      var uploadError, uploadFilesAdded, uploadProgress, uploadStart, uploadSuccess, uploader;
+      uploadProgress = function(uploader, file) {};
+      console.log('uploadProgress');
+      uploadStart = function(uploader) {
+        return console.log('uploadStart');
       };
-      return app.images.add(gif, {
-        at: 0
-      });
-    };
-    uploadFilesAdded = function(uploader, files) {
-      return $.each(files, function(i, file) {
-        if (i > 0) {
-          return uploader.removeFile(file);
+      uploadError = function() {
+        return alert('error');
+      };
+      uploadSuccess = function(attachment) {
+        var full, gif, unanimated;
+        console.log(attachment);
+        full = attachment.attributes.sizes.full;
+        unanimated = attachment.attributes.sizes['full-gif-static'] || full;
+        gif = {
+          id: attachment.id,
+          width: full.width,
+          height: full.height,
+          src: full.url,
+          "static": unanimated.url
+        };
+        return app.images.add(gif, {
+          at: 0
+        });
+      };
+      uploadFilesAdded = function(uploader, files) {
+        return $.each(files, function(i, file) {
+          if (i > 0) {
+            return uploader.removeFile(file);
+          }
+        });
+      };
+      uploader = new wp.Uploader({
+        container: $('.outer-wrapper'),
+        browser: $('.browser'),
+        dropzone: $('.outer-wrapper'),
+        success: uploadSuccess,
+        error: uploadError,
+        params: {
+          post_id: gifdropSettings.id,
+          provide_full_gif_static: true
+        },
+        supports: {
+          dragdrop: true
+        },
+        plupload: {
+          runtimes: "html5",
+          filters: [
+            {
+              title: "Image",
+              extensions: "jpg,jpeg,gif,png"
+            }
+          ]
         }
       });
-    };
-    uploader = new wp.Uploader({
-      container: $('.wrapper'),
-      browser: $('.browser'),
-      dropzone: $('.wrapper'),
-      success: uploadSuccess,
-      error: uploadError,
-      params: {
-        post_id: gifdropSettings.id,
-        provide_full_gif_static: true
-      },
-      supports: {
-        dragdrop: true
-      },
-      plupload: {
-        runtimes: "html5",
-        filters: [
-          {
-            title: "Image",
-            extensions: "jpg,jpeg,gif,png"
-          }
-        ]
+      if (uploader.supports.dragdrop) {
+        uploader.uploader.bind("BeforeUpload", uploadStart);
+        uploader.uploader.bind("UploadProgress", uploadProgress);
+        return uploader.uploader.bind("FilesAdded", uploadFilesAdded);
+      } else {
+        uploader.uploader.destroy();
+        return uploader = null;
       }
-    });
-    if (uploader.supports.dragdrop) {
-      uploader.uploader.bind("BeforeUpload", uploadStart);
-      uploader.uploader.bind("UploadProgress", uploadProgress);
-      return uploader.uploader.bind("FilesAdded", uploadFilesAdded);
-    } else {
-      uploader.uploader.destroy();
-      return uploader = null;
     }
-  });
+  };
 
   app.View = (function(_super) {
     __extends(View, _super);
@@ -100,6 +101,19 @@
     };
 
     return View;
+
+  })(wp.Backbone.View);
+
+  app.BrowserView = (function(_super) {
+    __extends(BrowserView, _super);
+
+    function BrowserView() {
+      return BrowserView.__super__.constructor.apply(this, arguments);
+    }
+
+    BrowserView.prototype.className = 'browser';
+
+    return BrowserView;
 
   })(wp.Backbone.View);
 
@@ -127,12 +141,37 @@
 
   })(Backbone.Collection);
 
+  app.MainView = (function(_super) {
+    __extends(MainView, _super);
+
+    function MainView() {
+      return MainView.__super__.constructor.apply(this, arguments);
+    }
+
+    MainView.prototype.className = 'wrapper';
+
+    MainView.prototype.initialize = function() {
+      this.views.add(new app.ImageNavView({
+        collection: this.collection
+      }));
+      this.views.add(new app.ImagesListView({
+        collection: this.collection
+      }));
+      return this.views.add(new app.BrowserView);
+    };
+
+    return MainView;
+
+  })(app.View);
+
   app.ImageNavView = (function(_super) {
     __extends(ImageNavView, _super);
 
     function ImageNavView() {
       return ImageNavView.__super__.constructor.apply(this, arguments);
     }
+
+    ImageNavView.prototype.className = 'nav';
 
     ImageNavView.prototype.template = wp.template('nav');
 
@@ -147,11 +186,12 @@
       return ImagesListView.__super__.constructor.apply(this, arguments);
     }
 
-    ImagesListView.prototype.template = wp.template('gifs');
+    ImagesListView.prototype.className = 'gifs';
 
     ImagesListView.prototype.masonryEnabled = false;
 
     ImagesListView.prototype.initialize = function() {
+      this.setSubviews();
       this.listenTo(this.collection, 'add', this.addNew);
       return this.listenTo(this, 'newView', this.animateItemIn);
     };
@@ -163,11 +203,11 @@
       if (this.masonryEnabled) {
         switch (position) {
           case 0:
-            return this.$gifs.isotope('prepended', $item);
+            return this.$el.isotope('prepended', $item);
           case max:
-            return this.$gifs.isotope('appended', $item);
+            return this.$el.isotope('appended', $item);
           default:
-            return this.$gifs.isotope('reloadItems').isotope();
+            return this.$el.isotope('reloadItems').isotope();
         }
       }
     };
@@ -183,42 +223,31 @@
       view = new app.ImageListView({
         model: model
       });
-      return this.views.add('.giflist', view, options);
+      return this.views.add(view, options);
     };
 
     ImagesListView.prototype.setSubviews = function() {
       var gifViews;
-      this.views.set('.gifnav', new app.ImageNavView({
-        collection: this.collection
-      }));
       gifViews = _.map(this.collection.models, function(gif) {
         return new app.ImageListView({
           model: gif
         });
       });
-      return this.views.set('.giflist', gifViews);
+      return this.views.set(gifViews);
     };
 
-    ImagesListView.prototype.init = function() {
-      this.setSubviews();
-      this.render();
-      $('.gifs').replaceWith(this.el);
-      this.views.ready();
+    ImagesListView.prototype.ready = function() {
       return this.masonry();
-    };
-
-    ImagesListView.prototype.postRender = function() {
-      return this.$gifs = this.$('.giflist');
     };
 
     ImagesListView.prototype.masonry = function() {
       this.masonryEnabled = true;
-      return this.$gifs.isotope({
-        layoutMode: 'masonry',
+      return this.$el.isotope({
+        layoutMode: 'fitRows',
         itemSelector: '.gif',
         sortBy: 'original-order',
         masonry: {
-          columnWidth: 50
+          columnWidth: 600
         }
       });
     };
@@ -260,7 +289,7 @@
     };
 
     ImageListView.prototype.postRender = function() {
-      return this.$img = this.$('img');
+      return this.$img = this.$('> img');
     };
 
     ImageListView.prototype.ready = function() {
