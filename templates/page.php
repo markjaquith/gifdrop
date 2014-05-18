@@ -6,10 +6,10 @@
 	<?php wp_print_styles( array( 'gifdrop' ) ); ?>
 </head>
 <body>
-	<div class="outer-wrapper">
+	<div id="outer-wrapper">
 		<noscript><?php _e( 'JavaScript needs to be enabled.' ); ?></noscript>
 	</div>
-
+	<div id="modal"></div>
 <?php // Backbone templates ?>
 
 <script type="text/html" id="tmpl-gif">
@@ -22,10 +22,7 @@
 </script>
 
 <script type="text/html" id="tmpl-single">
-<div class="modal-content">
 	<img src="{{data.src}}" />
-</div>
 </script>
-<div id="modal"><b>MODAL CONTENT</b></div>
 </body>
 </html>

@@ -9,12 +9,21 @@
 
   app = window.gifdropApp = {
     init: function() {
+      this.$wrapper = $('body > #outer-wrapper');
+      this.$browser = $('body > .browser');
+      this.$modal = $('body > #modal');
       this.images = new this.Images(_.toArray(gifdropSettings.attachments));
+      this.modalView = new app.ModalView({
+        collection: this.images
+      });
+      this.modalView.render();
+      this.$modal.replaceWith(this.modalView.el);
+      this.modalView.views.ready();
       this.view = new this.MainView({
         collection: this.images
       });
       this.view.render();
-      $('.outer-wrapper').html(this.view.el);
+      this.$wrapper.html(this.view.el);
       this.view.views.ready();
       return this.initUploads();
     },
@@ -53,9 +62,9 @@
         });
       };
       uploader = new wp.Uploader({
-        container: $('.outer-wrapper'),
-        browser: $('.browser'),
-        dropzone: $('.outer-wrapper'),
+        container: this.$wrapper,
+        browser: this.$browser,
+        dropzone: this.$wrapper,
         success: uploadSuccess,
         error: uploadError,
         params: {
@@ -323,15 +332,12 @@
     };
 
     ImageListView.prototype.click = function() {
-      var modal, singleView;
-      singleView = new app.SingleView({
+      var view;
+      view = new app.SingleView({
         model: this.model
       });
-      singleView.render();
-      modal = $('#modal');
-      modal.html(singleView.el);
-      singleView.views.ready();
-      return modal.show();
+      app.modalView.views.set(view);
+      return app.modalView.$el.show();
     };
 
     ImageListView.prototype.unCrop = function() {
@@ -374,6 +380,31 @@
 
   })(app.View);
 
+  app.ModalView = (function(_super) {
+    __extends(ModalView, _super);
+
+    function ModalView() {
+      return ModalView.__super__.constructor.apply(this, arguments);
+    }
+
+    ModalView.prototype.attributes = {
+      id: 'modal'
+    };
+
+    ModalView.prototype.events = {
+      click: 'click'
+    };
+
+    ModalView.prototype.click = function(e) {
+      if (this.el === e.target) {
+        return this.$el.hide();
+      }
+    };
+
+    return ModalView;
+
+  })(app.View);
+
   app.SingleView = (function(_super) {
     __extends(SingleView, _super);
 
@@ -382,6 +413,8 @@
     }
 
     SingleView.prototype.template = wp.template('single');
+
+    SingleView.prototype.className = 'modal-content';
 
     SingleView.prototype.prepare = function() {
       return this.model.toJSON();

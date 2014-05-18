@@ -2,11 +2,23 @@ $ = window.jQuery
 
 app = window.gifdropApp =
 	init: ->
+		@$wrapper = $ 'body > #outer-wrapper'
+		@$browser = $ 'body > .browser'
+		@$modal = $ 'body > #modal'
 		@images = new @Images _.toArray gifdropSettings.attachments
+
+		# Modal view
+		@modalView = new app.ModalView collection: @images
+		@modalView.render()
+		@$modal.replaceWith @modalView.el
+		@modalView.views.ready()
+
+		# Main view
 		@view = new @MainView collection: @images
 		@view.render()
-		$('.outer-wrapper').html @view.el
+		@$wrapper.html @view.el
 		@view.views.ready()
+
 		@initUploads()
 
 	initUploads: ->
@@ -38,9 +50,9 @@ app = window.gifdropApp =
 				uploader.removeFile file  if i > 0
 
 		uploader = new wp.Uploader
-			container: $ '.outer-wrapper'
-			browser: $ '.browser'
-			dropzone: $ '.outer-wrapper'
+			container: @$wrapper
+			browser: @$browser
+			dropzone: @$wrapper
 			success: uploadSuccess
 			error: uploadError
 			params:
@@ -167,12 +179,9 @@ class app.ImageListView extends app.View
 		@restoreCrop()
 
 	click: ->
-		singleView = new app.SingleView model: @model
-		singleView.render()
-		modal = $ '#modal'
-		modal.html singleView.el
-		singleView.views.ready()
-		modal.show()
+		view = new app.SingleView model: @model
+		app.modalView.views.set view
+		app.modalView.$el.show()
 
 	unCrop: ->
 		if @model.get('imgHeight') isnt @model.get('divHeight')
@@ -198,8 +207,18 @@ class app.ImageListView extends app.View
 	ready: ->
 		@views.parent.trigger 'newView', @model, @$el
 
+class app.ModalView extends app.View
+	attributes:
+		id: 'modal'
+	events:
+		click: 'click'
+
+	click: (e) ->
+		@$el.hide() if @el is e.target
+
 class app.SingleView extends app.View
 	template: wp.template 'single'
+	className: 'modal-content'
 
 	prepare: -> @model.toJSON()
 
