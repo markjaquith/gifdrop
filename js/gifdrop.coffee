@@ -69,10 +69,8 @@ app = window.gifdropApp =
 		1.5
 	]
 
-	ratioHeight: (w, h) ->
-		myRatio = h/w
-		for ratio in @ratios.sort((a, b) -> b - a)
-			return w * ratio if ratio < myRatio
+	restrictHeight: (w, h) ->
+		if h > 1.5 * w then 1.5 * w else h
 
 	fitTo: (w, h, newWidth) ->
 		ratio = h / w
@@ -92,7 +90,7 @@ class app.Image extends Backbone.Model
 		[width, height] = app.fitTo @get('width'), @get('height'), 320
 		@set
 			imgWidth: width
-			divHeight: app.ratioHeight width, height
+			divHeight: app.restrictHeight width, height
 			imgHeight: height
 
 class app.Images extends Backbone.Collection
@@ -165,28 +163,24 @@ class app.ImageListView extends app.View
 
 	mouseout: ->
 		@$img.attr src: @model.get 'static'
-		@crop()
+		@restoreCrop()
 
 	unCrop: ->
-		if @model.get('imgHeight') - @model.get('divHeight') <= 50
-			# It's 50 or fewer pixels taller, just let it overlap the image under it
-			css =
-				height: "#{@model.get 'imgHeight'}px"
-				'z-index': 1
-		else
+		if @model.get('imgHeight') isnt @model.get('divHeight')
 			# Restrict width to the width that will allow full height to show inside existing box
 			ratio = @model.get('imgWidth') / @model.get('imgHeight')
 			newWidth = @model.get('divHeight') * ratio
 			difference = @model.get('imgWidth') - newWidth
-			css = padding: "0 #{difference/2}px"
-		@$el.css css
+			@$el.css padding: "0 #{difference/2}px"
+
+	restoreCrop: ->
+		if @model.get('imgHeight') isnt @model.get('divHeight')
+			@$el.css
+				padding: 0
+				'z-index': 'auto'
 
 	crop: ->
-		@$el.css
-			height: "#{@model.get 'divHeight'}px"
-			padding: 0
-			'z-index': 'auto'
-
+		@$el.css height: "#{@model.get 'divHeight'}px"
 
 	postRender: ->
 		@crop()

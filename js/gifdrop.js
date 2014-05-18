@@ -85,17 +85,11 @@
       }
     },
     ratios: [.5, 1, 1.5],
-    ratioHeight: function(w, h) {
-      var myRatio, ratio, _i, _len, _ref;
-      myRatio = h / w;
-      _ref = this.ratios.sort(function(a, b) {
-        return b - a;
-      });
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        ratio = _ref[_i];
-        if (ratio < myRatio) {
-          return w * ratio;
-        }
+    restrictHeight: function(w, h) {
+      if (h > 1.5 * w) {
+        return 1.5 * w;
+      } else {
+        return h;
       }
     },
     fitTo: function(w, h, newWidth) {
@@ -150,7 +144,7 @@
       _ref = app.fitTo(this.get('width'), this.get('height'), 320), width = _ref[0], height = _ref[1];
       return this.set({
         imgWidth: width,
-        divHeight: app.ratioHeight(width, height),
+        divHeight: app.restrictHeight(width, height),
         imgHeight: height
       });
     };
@@ -324,32 +318,33 @@
       this.$img.attr({
         src: this.model.get('static')
       });
-      return this.crop();
+      return this.restoreCrop();
     };
 
     ImageListView.prototype.unCrop = function() {
-      var css, difference, newWidth, ratio;
-      if (this.model.get('imgHeight') - this.model.get('divHeight') <= 50) {
-        css = {
-          height: "" + (this.model.get('imgHeight')) + "px",
-          'z-index': 1
-        };
-      } else {
+      var difference, newWidth, ratio;
+      if (this.model.get('imgHeight') !== this.model.get('divHeight')) {
         ratio = this.model.get('imgWidth') / this.model.get('imgHeight');
         newWidth = this.model.get('divHeight') * ratio;
         difference = this.model.get('imgWidth') - newWidth;
-        css = {
+        return this.$el.css({
           padding: "0 " + (difference / 2) + "px"
-        };
+        });
       }
-      return this.$el.css(css);
+    };
+
+    ImageListView.prototype.restoreCrop = function() {
+      if (this.model.get('imgHeight') !== this.model.get('divHeight')) {
+        return this.$el.css({
+          padding: 0,
+          'z-index': 'auto'
+        });
+      }
     };
 
     ImageListView.prototype.crop = function() {
       return this.$el.css({
-        height: "" + (this.model.get('divHeight')) + "px",
-        padding: 0,
-        'z-index': 'auto'
+        height: "" + (this.model.get('divHeight')) + "px"
       });
     };
 
