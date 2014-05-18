@@ -17,7 +17,9 @@
 </script>
 
 <script type="text/html" id="tmpl-nav">
-NAV BAR GOES HERE
+<h1><?php _e( 'GifDrop', 'gifdrop' ); ?></h1>
+
+<input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
 </script>
 </body>
 </html>
