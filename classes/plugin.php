@@ -16,6 +16,7 @@ class GifDrop_Plugin {
 		add_filter( 'template_include', array( $this, 'template_include' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'metadata_filter', ), 10, 2 );
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
+		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
 	}
 
 	public static function get_instance( $__FILE__ = null ) {
@@ -60,6 +61,40 @@ class GifDrop_Plugin {
 
 	public function updated() {
 		include( $this->base . '/templates/updated.php' );
+	}
+
+	public function ajax() {
+		$request = stripslashes_deep( $_REQUEST );
+		if ( ! wp_verify_nonce( $request['_ajax_nonce'], 'gifdrop_' . $request['post_id'] ) ) {
+			$this->json_error( __( 'Invalid nonce', 'gifdrop' ) );
+		}
+		switch( $_REQUEST['subaction'] ) {
+			case 'update' :
+				$model = json_decode( $request['model'] );
+				$post = array(
+					'ID' => $model->id,
+					'post_title' => $model->title
+				);
+				if ( current_user_can( 'edit_post', $model->id ) ) {
+					$success = wp_update_post( $post );
+				} else {
+					$this->json_error( __( 'You are not allowed to update this item', 'gifdrop' ) );
+				}
+
+				if ( $success ) {
+					wp_send_json_success( array() );
+				} else {
+					$this->json_error( __( 'Update failure. Try again?', 'gifdrop' ) );
+				}
+				break;
+			default:
+				$this->json_error( __( 'Invalid subaction', 'gifdrop' ) );
+		}
+	}
+
+	public function json_error( $message ) {
+		status_header( 412 );
+		wp_send_json_error( array( 'message' => $message ) );
 	}
 
 	public function admin_enqueue_scripts() {
