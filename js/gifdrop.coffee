@@ -127,7 +127,8 @@ class app.Images extends Backbone.Collection
 	model: app.Image
 
 	initialize: (models) ->
-		@allGifs = new Backbone.Collection models
+		allGifs = (new app.Image model for model in models)
+		@allGifs = new Backbone.Collection allGifs
 
 	findGifs: (terms) ->
 		termWords = terms.split /[ -_]/
@@ -169,6 +170,9 @@ class app.ImageNavView extends app.View
 
 	postRender: ->
 		@$search = @$ 'input.search'
+
+	ready: ->
+		@$search.focus()
 
 class app.ImagesListView extends app.View
 	className: 'gifs'

@@ -203,7 +203,17 @@
     Images.prototype.model = app.Image;
 
     Images.prototype.initialize = function(models) {
-      return this.allGifs = new Backbone.Collection(models);
+      var allGifs, model;
+      allGifs = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = models.length; _i < _len; _i++) {
+          model = models[_i];
+          _results.push(new app.Image(model));
+        }
+        return _results;
+      })();
+      return this.allGifs = new Backbone.Collection(allGifs);
     };
 
     Images.prototype.findGifs = function(terms) {
@@ -299,6 +309,10 @@
 
     ImageNavView.prototype.postRender = function() {
       return this.$search = this.$('input.search');
+    };
+
+    ImageNavView.prototype.ready = function() {
+      return this.$search.focus();
     };
 
     return ImageNavView;
