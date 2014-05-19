@@ -9,10 +9,11 @@
 
   app = window.gifdropApp = {
     init: function() {
+      this.settings = gifdropSettings;
       this.$wrapper = $('body > #outer-wrapper');
       this.$browser = $('body > .browser');
       this.$modal = $('body > #modal');
-      this.images = new this.Images(_.toArray(gifdropSettings.attachments));
+      this.images = new this.Images(_.toArray(this.settings.attachments));
       this.modalView = new app.ModalView({
         collection: this.images
       });
@@ -93,7 +94,6 @@
         return uploader = null;
       }
     },
-    ratios: [.5, 1, 1.5],
     restrictHeight: function(w, h) {
       if (h > 1.5 * w) {
         return 1.5 * w;
@@ -105,6 +105,17 @@
       var ratio;
       ratio = h / w;
       return [newWidth, Math.round(newWidth * ratio)];
+    },
+    sync: function(options) {
+      options = _.defaults(options || {}, {
+        context: this
+      });
+      options.data = _.defaults(options.data || {}, {
+        action: 'gifdrop',
+        post_id: this.settings.id,
+        _ajax_nonce: this.settings.nonce
+      });
+      return wp.ajax.send(options);
     }
   };
 
@@ -156,6 +167,26 @@
         divHeight: app.restrictHeight(width, height),
         imgHeight: height
       });
+    };
+
+    Image.prototype._sync = function(data, options) {
+      return app.sync({
+        context: this,
+        success: options.success,
+        error: options.error,
+        data: data
+      });
+    };
+
+    Image.prototype.sync = function(method, model, options) {
+      var data;
+      if ('update' === method) {
+        data = {
+          subaction: method,
+          model: JSON.stringify(model.toJSON())
+        };
+        return this._sync(data, options);
+      }
     };
 
     return Image;
@@ -416,6 +447,21 @@
     SingleView.prototype.template = wp.template('single');
 
     SingleView.prototype.className = 'modal-content';
+
+    SingleView.prototype.events = {
+      'click button.save': 'save'
+    };
+
+    SingleView.prototype.save = function() {
+      this.model.set({
+        title: this.$title.val()
+      });
+      return this.model.save();
+    };
+
+    SingleView.prototype.postRender = function() {
+      return this.$title = this.$('input.title');
+    };
 
     SingleView.prototype.prepare = function() {
       return this.model.toJSON();

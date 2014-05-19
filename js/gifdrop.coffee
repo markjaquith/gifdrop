@@ -2,10 +2,11 @@ $ = window.jQuery
 
 app = window.gifdropApp =
 	init: ->
+		@settings = gifdropSettings
 		@$wrapper = $ 'body > #outer-wrapper'
 		@$browser = $ 'body > .browser'
 		@$modal = $ 'body > #modal'
-		@images = new @Images _.toArray gifdropSettings.attachments
+		@images = new @Images _.toArray @settings.attachments
 
 		# Modal view
 		@modalView = new app.ModalView collection: @images
@@ -75,18 +76,21 @@ app = window.gifdropApp =
 			uploader.uploader.destroy()
 			uploader = null
 
-	ratios: [
-		.5
-		1
-		1.5
-	]
-
 	restrictHeight: (w, h) ->
 		if h > 1.5 * w then 1.5 * w else h
 
 	fitTo: (w, h, newWidth) ->
 		ratio = h / w
 		[newWidth, Math.round(newWidth * ratio)]
+
+	sync: (options) ->
+		options = _.defaults options or {},
+			context: @
+		options.data = _.defaults options.data or {},
+			action: 'gifdrop'
+			post_id: @settings.id
+			_ajax_nonce: @settings.nonce
+		wp.ajax.send options
 
 class app.View extends wp.Backbone.View
 	render: ->
@@ -104,6 +108,20 @@ class app.Image extends Backbone.Model
 			imgWidth: width
 			divHeight: app.restrictHeight width, height
 			imgHeight: height
+
+	_sync: (data, options) ->
+		app.sync
+			context: @
+			success: options.success
+			error: options.error
+			data: data
+
+	sync: (method, model, options) ->
+		if 'update' is method
+			data =
+				subaction: method
+				model: JSON.stringify model.toJSON()
+			@_sync data, options
 
 class app.Images extends Backbone.Collection
 	model: app.Image
@@ -220,6 +238,16 @@ class app.ModalView extends app.View
 class app.SingleView extends app.View
 	template: wp.template 'single'
 	className: 'modal-content'
+	events:
+		'click button.save': 'save'
+
+	save: ->
+		@model.set
+			title: @$title.val()
+		@model.save()
+
+	postRender: ->
+		@$title = @$ 'input.title'
 
 	prepare: -> @model.toJSON()
 
