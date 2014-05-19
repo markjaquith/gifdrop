@@ -18,18 +18,18 @@ class GifDrop_Plugin {
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
 	}
 
-	public static function get_instance( $__FILE__ ) {
+	public static function get_instance( $__FILE__ = null ) {
 		if ( ! isset( self::$instance ) ) {
 			new self( $__FILE__ );
 		}
 		return self::$instance;
 	}
 
-	protected function get_url() {
+	public function get_url() {
 		return plugin_dir_url( $this->__FILE__ );
 	}
 
-	protected function get_path() {
+	public function get_path() {
 		return plugin_dir_path( $this->__FILE__ );
 	}
 

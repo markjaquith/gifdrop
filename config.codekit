@@ -122,12 +122,12 @@
 		"outputStyle": 1,
 		"syntaxCheckerStyle": 1
 		},
-	"\/js\/jquery.colorbox-min.js": {
+	"\/js\/jquery.colorbox.min.js": {
 		"fileType": 64,
-		"ignore": 1,
-		"ignoreWasSetByUser": 1,
-		"inputAbbreviatedPath": "\/js\/jquery.colorbox-min.js",
-		"outputAbbreviatedPath": "\/js\/min\/jquery.colorbox-min-ck.js",
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/js\/jquery.colorbox.min.js",
+		"outputAbbreviatedPath": "\/js\/min\/jquery.colorbox.min-ck.js",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0,
 		"outputStyle": 1,
@@ -175,7 +175,7 @@
 	},
 "hooks": [
 	],
-"lastSavedByUser": "Mark Jaquith",
+"lastSavedByUser": "Mark",
 "manualImportLinks": {
 	},
 "projectAttributes": {
@@ -249,14 +249,6 @@
 			"active": 1,
 			"flagValue": -1
 			},
-		"no_debugger": {
-			"active": 1,
-			"flagValue": -1
-			},
-		"no_empty_functions": {
-			"active": 0,
-			"flagValue": -1
-			},
 		"no_empty_param_list": {
 			"active": 0,
 			"flagValue": -1
@@ -266,10 +258,6 @@
 			"flagValue": -1
 			},
 		"no_implicit_parens": {
-			"active": 0,
-			"flagValue": -1
-			},
-		"no_interpolation_in_single_quotes": {
 			"active": 0,
 			"flagValue": -1
 			},
@@ -295,10 +283,6 @@
 			},
 		"no_trailing_whitespace": {
 			"active": 1,
-			"flagValue": -1
-			},
-		"no_unnecessary_double_quotes": {
-			"active": 0,
 			"flagValue": -1
 			},
 		"non_empty_constructor_needs_parens": {
