@@ -308,9 +308,9 @@
     ImageListView.prototype.template = wp.template('gif');
 
     ImageListView.prototype.events = {
-      'mouseover': 'mouseover',
-      'mouseout': 'mouseout',
-      'click': 'click'
+      mouseover: 'mouseover',
+      mouseout: 'mouseout',
+      click: 'click'
     };
 
     ImageListView.prototype.prepare = function() {
@@ -337,6 +337,7 @@
         model: this.model
       });
       app.modalView.views.set(view);
+      this.mouseout();
       return app.modalView.$el.show();
     };
 

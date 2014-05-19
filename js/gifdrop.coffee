@@ -164,9 +164,9 @@ class app.ImageListView extends app.View
 	className: 'gif'
 	template: wp.template 'gif'
 	events:
-		'mouseover': 'mouseover'
-		'mouseout': 'mouseout'
-		'click': 'click'
+		mouseover: 'mouseover'
+		mouseout: 'mouseout'
+		click: 'click'
 
 	prepare: -> @model.toJSON()
 
@@ -181,6 +181,7 @@ class app.ImageListView extends app.View
 	click: ->
 		view = new app.SingleView model: @model
 		app.modalView.views.set view
+		@mouseout()
 		app.modalView.$el.show()
 
 	unCrop: ->
