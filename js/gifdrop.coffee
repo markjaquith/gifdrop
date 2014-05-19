@@ -126,6 +126,19 @@ class app.Image extends Backbone.Model
 class app.Images extends Backbone.Collection
 	model: app.Image
 
+	initialize: (models) ->
+		@allGifs = new Backbone.Collection models
+
+	findGifs: (terms) ->
+		termWords = terms.split /[ -_]/
+		results = @allGifs.filter (model) ->
+			titleWords = model.get('title').split /[ -_]/
+			for word in titleWords
+				termResults = (word.toLowerCase() is termWord.toLowerCase() for termWord in termWords)
+				termResults = _.filter termResults, (r) -> r
+				return true if termResults.length is termWords.length
+			false
+
 class app.MainView extends app.View
 	className: 'wrapper'
 	initialize: ->
@@ -136,6 +149,26 @@ class app.MainView extends app.View
 class app.ImageNavView extends app.View
 	className: 'nav'
 	template: wp.template 'nav'
+	events:
+		'keyup input.search': 'search'
+	lastSearch: ''
+
+	search: (e) ->
+		search = @$search.val()
+		if search isnt @lastSearch
+			if search.length > 2
+				@lastSearch = search
+				results = @collection.findGifs search
+				if results.length
+					@collection.reset results
+				else
+					@collection.reset []
+			else if search.length is 0
+				@lastSearch = search
+				@collection.reset @collection.allGifs.models
+
+	postRender: ->
+		@$search = @$ 'input.search'
 
 class app.ImagesListView extends app.View
 	className: 'gifs'
@@ -145,6 +178,7 @@ class app.ImagesListView extends app.View
 		@setSubviews()
 		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
+		@listenTo @collection, 'reset', @setSubviews
 
 	animateItemIn: (model, $item) ->
 		position = @collection.indexOf model

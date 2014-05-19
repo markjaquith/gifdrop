@@ -202,6 +202,38 @@
 
     Images.prototype.model = app.Image;
 
+    Images.prototype.initialize = function(models) {
+      return this.allGifs = new Backbone.Collection(models);
+    };
+
+    Images.prototype.findGifs = function(terms) {
+      var results, termWords;
+      termWords = terms.split(/[ -_]/);
+      return results = this.allGifs.filter(function(model) {
+        var termResults, termWord, titleWords, word, _i, _len;
+        titleWords = model.get('title').split(/[ -_]/);
+        for (_i = 0, _len = titleWords.length; _i < _len; _i++) {
+          word = titleWords[_i];
+          termResults = (function() {
+            var _j, _len1, _results;
+            _results = [];
+            for (_j = 0, _len1 = termWords.length; _j < _len1; _j++) {
+              termWord = termWords[_j];
+              _results.push(word.toLowerCase() === termWord.toLowerCase());
+            }
+            return _results;
+          })();
+          termResults = _.filter(termResults, function(r) {
+            return r;
+          });
+          if (termResults.length === termWords.length) {
+            return true;
+          }
+        }
+        return false;
+      });
+    };
+
     return Images;
 
   })(Backbone.Collection);
@@ -240,6 +272,35 @@
 
     ImageNavView.prototype.template = wp.template('nav');
 
+    ImageNavView.prototype.events = {
+      'keyup input.search': 'search'
+    };
+
+    ImageNavView.prototype.lastSearch = '';
+
+    ImageNavView.prototype.search = function(e) {
+      var results, search;
+      search = this.$search.val();
+      if (search !== this.lastSearch) {
+        if (search.length > 2) {
+          this.lastSearch = search;
+          results = this.collection.findGifs(search);
+          if (results.length) {
+            return this.collection.reset(results);
+          } else {
+            return this.collection.reset([]);
+          }
+        } else if (search.length === 0) {
+          this.lastSearch = search;
+          return this.collection.reset(this.collection.allGifs.models);
+        }
+      }
+    };
+
+    ImageNavView.prototype.postRender = function() {
+      return this.$search = this.$('input.search');
+    };
+
     return ImageNavView;
 
   })(app.View);
@@ -259,7 +320,8 @@
     ImagesListView.prototype.initialize = function() {
       this.setSubviews();
       this.listenTo(this.collection, 'add', this.addNew);
-      return this.listenTo(this, 'newView', this.animateItemIn);
+      this.listenTo(this, 'newView', this.animateItemIn);
+      return this.listenTo(this.collection, 'reset', this.setSubviews);
     };
 
     ImagesListView.prototype.animateItemIn = function(model, $item) {
