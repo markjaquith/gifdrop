@@ -104,7 +104,7 @@
     fitTo: function(w, h, newWidth) {
       var ratio;
       ratio = h / w;
-      return [newWidth, Math.floor(newWidth * ratio)];
+      return [newWidth, Math.round(newWidth * ratio)];
     }
   };
 

@@ -5,6 +5,13 @@
 
 body
 	margin: 0
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+
+input
+	border: 1px solid #aaa
+	+border-radius(2px)
+	&:focus
+		outline: none
 
 #outer-wrapper
 	width: 100%
@@ -44,19 +51,19 @@ body
 		margin: 0
 		float: left
 		padding: 8px
-		font: 24px/30px Helvetica, Arial, sans-serif
+		font-size: 24px
+		line-height: 30px
 		color: #eee
 		background: #222
+		letter-spacing: 0.01em
 	input
 		float: left
 		width: 250px
 		margin: 8px
 		height: 30px
-		font: 18px Helvetica, Arial, sans-serif
+		font-size: 18px
 		padding: 3px
 		border: none
-		&:focus
-			outline: none
 
 #modal
 	z-index: 3
@@ -74,7 +81,28 @@ body
 .modal-content
 	margin: 0 auto
 	padding: 20px
-	width: 640px
+	max-width: 640px
+	width: 80%
 	height: 100%
 	background: #fff
 	text-align: center
+	button
+		padding: 6px 10px
+		border: 1px solid #aaa
+		font-size: 18px
+		background: #eef
+		+border-radius(3px)
+		+box-shadow(#ccc 2px 2px 10px inset)
+
+
+.gif-details
+	width: 90%
+	td:first-child
+		text-align: right
+		width: 80px
+		font-size: 18px
+		font-weight: bold
+	input[type=text]
+		font-size: 18px
+		padding: 5px
+		width: 100%

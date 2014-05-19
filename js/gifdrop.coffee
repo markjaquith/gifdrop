@@ -86,7 +86,7 @@ app = window.gifdropApp =
 
 	fitTo: (w, h, newWidth) ->
 		ratio = h / w
-		[newWidth, Math.floor(newWidth * ratio)]
+		[newWidth, Math.round(newWidth * ratio)]
 
 class app.View extends wp.Backbone.View
 	render: ->

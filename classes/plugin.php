@@ -132,6 +132,7 @@ class GifDrop_Plugin {
 			'static' => $static ? $static[0] : $full[0],
 			'width' => $full[1],
 			'height' => $full[2],
+			'title' => $attachment->post_title,
 		);
 	}
 
