@@ -4,7 +4,6 @@ app = window.gifdropApp =
 	init: ->
 		@settings = gifdropSettings
 		@$wrapper = $ 'body > #outer-wrapper'
-		@$browser = $ 'body > .browser'
 		@$modal = $ 'body > #modal'
 		@images = new @Images _.toArray @settings.attachments
 
@@ -19,6 +18,8 @@ app = window.gifdropApp =
 		@view.render()
 		@$wrapper.html @view.el
 		@view.views.ready()
+
+		@$browser = $ '.browser'
 
 		@modalView.listenTo @modalView, 'modalOpen', ->
 			$('body').addClass 'modal-open'
@@ -42,12 +43,14 @@ app = window.gifdropApp =
 
 		uploadSuccess = (attachment) ->
 			console.log attachment
-			full = attachment.attributes.sizes.full
-			unanimated = attachment.attributes.sizes['full-gif-static'] or full
+			attr = attachment.attributes
+			full = attr.sizes.full
+			unanimated = attr.sizes['full-gif-static'] or full
 			gif =
 				id: attachment.id
 				width: full.width
 				height: full.height
+				title: attr.title
 				src: full.url
 				static: unanimated.url
 			app.images.add gif, at: 0
@@ -63,7 +66,7 @@ app = window.gifdropApp =
 			success: uploadSuccess
 			error: uploadError
 			params:
-				post_id: gifdropSettings.id
+				post_id: @settings.id
 				provide_full_gif_static: yes
 			supports:
 				dragdrop: yes

@@ -11,7 +11,6 @@
     init: function() {
       this.settings = gifdropSettings;
       this.$wrapper = $('body > #outer-wrapper');
-      this.$browser = $('body > .browser');
       this.$modal = $('body > #modal');
       this.images = new this.Images(_.toArray(this.settings.attachments));
       this.modalView = new app.ModalView({
@@ -26,6 +25,7 @@
       this.view.render();
       this.$wrapper.html(this.view.el);
       this.view.views.ready();
+      this.$browser = $('.browser');
       this.modalView.listenTo(this.modalView, 'modalOpen', function() {
         return $('body').addClass('modal-open');
       });
@@ -47,14 +47,16 @@
         return alert('error');
       };
       uploadSuccess = function(attachment) {
-        var full, gif, unanimated;
+        var attr, full, gif, unanimated;
         console.log(attachment);
-        full = attachment.attributes.sizes.full;
-        unanimated = attachment.attributes.sizes['full-gif-static'] || full;
+        attr = attachment.attributes;
+        full = attr.sizes.full;
+        unanimated = attr.sizes['full-gif-static'] || full;
         gif = {
           id: attachment.id,
           width: full.width,
           height: full.height,
+          title: attr.title,
           src: full.url,
           "static": unanimated.url
         };
@@ -76,7 +78,7 @@
         success: uploadSuccess,
         error: uploadError,
         params: {
-          post_id: gifdropSettings.id,
+          post_id: this.settings.id,
           provide_full_gif_static: true
         },
         supports: {
