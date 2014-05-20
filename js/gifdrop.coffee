@@ -291,18 +291,26 @@ class app.ModalView extends app.View
 	events:
 		click: 'click'
 
+	close: ->
+		@$el.hide()
+
 	click: (e) ->
-		@$el.hide() if @el is e.target
+		@close() if @el is e.target
 
 class app.SingleView extends app.View
 	template: wp.template 'single'
 	className: 'modal-content'
 	events:
 		'click button.save': 'save'
+		'keypress input': 'keypress'
 
 	save: ->
 		@model.set title: @$title.val()
 		@model.save()
+		@views.parent.close()
+
+	keypress: (e) ->
+		@save() if e.which is 13
 
 	postRender: ->
 		@$title = @$ 'input.title'

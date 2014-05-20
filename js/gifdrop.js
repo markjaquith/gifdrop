@@ -556,9 +556,13 @@
       click: 'click'
     };
 
+    ModalView.prototype.close = function() {
+      return this.$el.hide();
+    };
+
     ModalView.prototype.click = function(e) {
       if (this.el === e.target) {
-        return this.$el.hide();
+        return this.close();
       }
     };
 
@@ -578,14 +582,22 @@
     SingleView.prototype.className = 'modal-content';
 
     SingleView.prototype.events = {
-      'click button.save': 'save'
+      'click button.save': 'save',
+      'keypress input': 'keypress'
     };
 
     SingleView.prototype.save = function() {
       this.model.set({
         title: this.$title.val()
       });
-      return this.model.save();
+      this.model.save();
+      return this.views.parent.close();
+    };
+
+    SingleView.prototype.keypress = function(e) {
+      if (e.which === 13) {
+        return this.save();
+      }
     };
 
     SingleView.prototype.postRender = function() {
