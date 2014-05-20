@@ -127,20 +127,24 @@ class app.Images extends Backbone.Collection
 	model: app.Image
 
 	initialize: (models) ->
-		allGifs = (new app.Image model for model in models)
-		@allGifs = new Backbone.Collection allGifs
+		allModels = (new app.Image model for model in models)
+		@filtered = new Backbone.Collection allModels
 
-	findGifs: (terms) ->
-		termWords = terms.split /[ _-]/
-		lastWord = _.last(termWords).toLowerCase()
-		results = @allGifs.filter (model) ->
-			titleWords = model.get('title').split /[ _-]/
-			for word in titleWords
-				termResults = (for termWord in termWords
-					if lastWord is termWord.toLowerCase() then 0 is word.toLowerCase().indexOf(lastWord) else word.toLowerCase() is termWord.toLowerCase() )
-				termResults = _.filter termResults, (r) -> r
-				return true if termResults.length is termWords.length
-			false
+	findGifs: (search) ->
+		if search.length > 0
+			termWords = search.split /[ _-]/
+			lastWord = _.last(termWords).toLowerCase()
+			results = @filter (model) ->
+				titleWords = model.get('title').split /[ _-]/
+				for word in titleWords
+					termResults = (for termWord in termWords
+						if lastWord is termWord.toLowerCase() then 0 is word.toLowerCase().indexOf(lastWord) else word.toLowerCase() is termWord.toLowerCase() )
+					termResults = _.filter termResults, (r) -> r
+					return true if termResults.length is termWords.length
+				false
+		else
+			results = @models
+		@filtered.reset results
 
 class app.MainView extends app.View
 	className: 'wrapper'
@@ -156,19 +160,8 @@ class app.ImageNavView extends app.View
 		'keyup input.search': 'search'
 	lastSearch: ''
 
-	search: (e) ->
-		search = @$search.val()
-		if search isnt @lastSearch
-			if search.length > 2
-				@lastSearch = search
-				results = @collection.findGifs search
-				if results.length
-					@collection.reset results
-				else
-					@collection.reset []
-			else if search.length is 0
-				@lastSearch = search
-				@collection.reset @collection.allGifs.models
+	search: ->
+		@collection.findGifs @$search.val()
 
 	postRender: ->
 		@$search = @$ 'input.search'
@@ -182,13 +175,13 @@ class app.ImagesListView extends app.View
 
 	initialize: ->
 		@setSubviews()
-		@listenTo @collection, 'add', @addNew
+		@listenTo @collection.filtered, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
-		@listenTo @collection, 'reset', @setSubviews
+		@listenTo @collection.filtered, 'reset', @filterIsotope
 
 	animateItemIn: (model, $item) ->
-		position = @collection.indexOf model
-		max = @collection.length - 1
+		position = @collection.filtered.indexOf model
+		max = @collection.filtered.length - 1
 		if @masonryEnabled
 			switch position
 				when 0 then @$el.isotope 'prepended', $item
@@ -202,8 +195,13 @@ class app.ImagesListView extends app.View
 		view = new app.ImageListView model: model
 		@views.add view, options
 
+	filterIsotope: (collection, options ) ->
+		@$el.isotope
+			filter: ->
+				_.contains( _.chain( collection.models ).map( (m) -> "gif-#{m.get 'id'}" ).value(), $(@).attr('id') )
+
 	setSubviews: ->
-		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
+		gifViews = _.map @collection.filtered.models, (gif) -> new app.ImageListView model: gif
 		@views.set gifViews
 
 	ready: -> $ => @masonry()
@@ -225,6 +223,8 @@ class app.ImageListView extends app.View
 		mouseover: 'mouseover'
 		mouseout: 'mouseout'
 		click: 'click'
+	attributes: ->
+		id: "gif-#{@model.get 'id'}"
 
 	prepare: -> @model.toJSON()
 

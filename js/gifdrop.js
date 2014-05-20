@@ -203,8 +203,8 @@
     Images.prototype.model = app.Image;
 
     Images.prototype.initialize = function(models) {
-      var allGifs, model;
-      allGifs = (function() {
+      var allModels, model;
+      allModels = (function() {
         var _i, _len, _results;
         _results = [];
         for (_i = 0, _len = models.length; _i < _len; _i++) {
@@ -213,40 +213,45 @@
         }
         return _results;
       })();
-      return this.allGifs = new Backbone.Collection(allGifs);
+      return this.filtered = new Backbone.Collection(allModels);
     };
 
-    Images.prototype.findGifs = function(terms) {
+    Images.prototype.findGifs = function(search) {
       var lastWord, results, termWords;
-      termWords = terms.split(/[ _-]/);
-      lastWord = _.last(termWords).toLowerCase();
-      return results = this.allGifs.filter(function(model) {
-        var termResults, termWord, titleWords, word, _i, _len;
-        titleWords = model.get('title').split(/[ _-]/);
-        for (_i = 0, _len = titleWords.length; _i < _len; _i++) {
-          word = titleWords[_i];
-          termResults = (function() {
-            var _j, _len1, _results;
-            _results = [];
-            for (_j = 0, _len1 = termWords.length; _j < _len1; _j++) {
-              termWord = termWords[_j];
-              if (lastWord === termWord.toLowerCase()) {
-                _results.push(0 === word.toLowerCase().indexOf(lastWord));
-              } else {
-                _results.push(word.toLowerCase() === termWord.toLowerCase());
+      if (search.length > 0) {
+        termWords = search.split(/[ _-]/);
+        lastWord = _.last(termWords).toLowerCase();
+        results = this.filter(function(model) {
+          var termResults, termWord, titleWords, word, _i, _len;
+          titleWords = model.get('title').split(/[ _-]/);
+          for (_i = 0, _len = titleWords.length; _i < _len; _i++) {
+            word = titleWords[_i];
+            termResults = (function() {
+              var _j, _len1, _results;
+              _results = [];
+              for (_j = 0, _len1 = termWords.length; _j < _len1; _j++) {
+                termWord = termWords[_j];
+                if (lastWord === termWord.toLowerCase()) {
+                  _results.push(0 === word.toLowerCase().indexOf(lastWord));
+                } else {
+                  _results.push(word.toLowerCase() === termWord.toLowerCase());
+                }
               }
+              return _results;
+            })();
+            termResults = _.filter(termResults, function(r) {
+              return r;
+            });
+            if (termResults.length === termWords.length) {
+              return true;
             }
-            return _results;
-          })();
-          termResults = _.filter(termResults, function(r) {
-            return r;
-          });
-          if (termResults.length === termWords.length) {
-            return true;
           }
-        }
-        return false;
-      });
+          return false;
+        });
+      } else {
+        results = this.models;
+      }
+      return this.filtered.reset(results);
     };
 
     return Images;
@@ -293,23 +298,8 @@
 
     ImageNavView.prototype.lastSearch = '';
 
-    ImageNavView.prototype.search = function(e) {
-      var results, search;
-      search = this.$search.val();
-      if (search !== this.lastSearch) {
-        if (search.length > 2) {
-          this.lastSearch = search;
-          results = this.collection.findGifs(search);
-          if (results.length) {
-            return this.collection.reset(results);
-          } else {
-            return this.collection.reset([]);
-          }
-        } else if (search.length === 0) {
-          this.lastSearch = search;
-          return this.collection.reset(this.collection.allGifs.models);
-        }
-      }
+    ImageNavView.prototype.search = function() {
+      return this.collection.findGifs(this.$search.val());
     };
 
     ImageNavView.prototype.postRender = function() {
@@ -338,15 +328,15 @@
 
     ImagesListView.prototype.initialize = function() {
       this.setSubviews();
-      this.listenTo(this.collection, 'add', this.addNew);
+      this.listenTo(this.collection.filtered, 'add', this.addNew);
       this.listenTo(this, 'newView', this.animateItemIn);
-      return this.listenTo(this.collection, 'reset', this.setSubviews);
+      return this.listenTo(this.collection.filtered, 'reset', this.filterIsotope);
     };
 
     ImagesListView.prototype.animateItemIn = function(model, $item) {
       var max, position;
-      position = this.collection.indexOf(model);
-      max = this.collection.length - 1;
+      position = this.collection.filtered.indexOf(model);
+      max = this.collection.filtered.length - 1;
       if (this.masonryEnabled) {
         switch (position) {
           case 0:
@@ -373,9 +363,19 @@
       return this.views.add(view, options);
     };
 
+    ImagesListView.prototype.filterIsotope = function(collection, options) {
+      return this.$el.isotope({
+        filter: function() {
+          return _.contains(_.chain(collection.models).map(function(m) {
+            return "gif-" + (m.get('id'));
+          }).value(), $(this).attr('id'));
+        }
+      });
+    };
+
     ImagesListView.prototype.setSubviews = function() {
       var gifViews;
-      gifViews = _.map(this.collection.models, function(gif) {
+      gifViews = _.map(this.collection.filtered.models, function(gif) {
         return new app.ImageListView({
           model: gif
         });
@@ -423,6 +423,12 @@
       mouseover: 'mouseover',
       mouseout: 'mouseout',
       click: 'click'
+    };
+
+    ImageListView.prototype.attributes = function() {
+      return {
+        id: "gif-" + (this.model.get('id'))
+      };
     };
 
     ImageListView.prototype.prepare = function() {
