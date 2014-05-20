@@ -98,6 +98,9 @@ class app.View extends wp.Backbone.View
 		@postRender?()
 		result
 
+	prepare: ->
+		@model?.toJSON?()
+
 class app.BrowserView extends wp.Backbone.View
 	className: 'browser'
 
@@ -245,8 +248,6 @@ class app.ImageListView extends app.View
 	attributes: ->
 		id: "gif-#{@model.get 'id'}"
 
-	prepare: -> @model.toJSON()
-
 	mouseover: ->
 		@$img.attr src: @model.get 'src'
 		@unCrop()
@@ -257,9 +258,9 @@ class app.ImageListView extends app.View
 
 	click: ->
 		view = new app.SingleView model: @model
+		app.modalView.$el.show()
 		app.modalView.views.set view
 		@mouseout()
-		app.modalView.$el.show()
 
 	unCrop: ->
 		if @model.get('imgHeight') isnt @model.get('divHeight')
@@ -292,6 +293,7 @@ class app.ModalView extends app.View
 		click: 'click'
 
 	close: ->
+		subview.trigger 'modalClosing' for subview in @views.get()
 		@$el.hide()
 
 	click: (e) ->
@@ -301,20 +303,25 @@ class app.SingleView extends app.View
 	template: wp.template 'single'
 	className: 'modal-content'
 	events:
-		'click button.save': 'save'
 		'keypress input': 'keypress'
+
+	initialize: ->
+		@listenTo @, 'modalClosing', @save
 
 	save: ->
 		@model.set title: @$title.val()
 		@model.save()
-		@views.parent.close()
 
 	keypress: (e) ->
-		@save() if e.which is 13
+		if e.which is 13
+			@save()
+			@views.parent.close()
 
 	postRender: ->
 		@$title = @$ 'input.title'
 
-	prepare: -> @model.toJSON()
+	ready: ->
+		@$title.focus().val(@$title.val())
+
 
 $ -> app.init()

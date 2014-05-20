@@ -135,6 +135,11 @@
       return result;
     };
 
+    View.prototype.prepare = function() {
+      var _ref;
+      return (_ref = this.model) != null ? typeof _ref.toJSON === "function" ? _ref.toJSON() : void 0 : void 0;
+    };
+
     return View;
 
   })(wp.Backbone.View);
@@ -473,10 +478,6 @@
       };
     };
 
-    ImageListView.prototype.prepare = function() {
-      return this.model.toJSON();
-    };
-
     ImageListView.prototype.mouseover = function() {
       this.$img.attr({
         src: this.model.get('src')
@@ -496,9 +497,9 @@
       view = new app.SingleView({
         model: this.model
       });
+      app.modalView.$el.show();
       app.modalView.views.set(view);
-      this.mouseout();
-      return app.modalView.$el.show();
+      return this.mouseout();
     };
 
     ImageListView.prototype.unCrop = function() {
@@ -557,6 +558,12 @@
     };
 
     ModalView.prototype.close = function() {
+      var subview, _i, _len, _ref;
+      _ref = this.views.get();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        subview = _ref[_i];
+        subview.trigger('modalClosing');
+      }
       return this.$el.hide();
     };
 
@@ -582,21 +589,24 @@
     SingleView.prototype.className = 'modal-content';
 
     SingleView.prototype.events = {
-      'click button.save': 'save',
       'keypress input': 'keypress'
+    };
+
+    SingleView.prototype.initialize = function() {
+      return this.listenTo(this, 'modalClosing', this.save);
     };
 
     SingleView.prototype.save = function() {
       this.model.set({
         title: this.$title.val()
       });
-      this.model.save();
-      return this.views.parent.close();
+      return this.model.save();
     };
 
     SingleView.prototype.keypress = function(e) {
       if (e.which === 13) {
-        return this.save();
+        this.save();
+        return this.views.parent.close();
       }
     };
 
@@ -604,8 +614,8 @@
       return this.$title = this.$('input.title');
     };
 
-    SingleView.prototype.prepare = function() {
-      return this.model.toJSON();
+    SingleView.prototype.ready = function() {
+      return this.$title.focus().val(this.$title.val());
     };
 
     return SingleView;

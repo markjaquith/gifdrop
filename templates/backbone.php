@@ -11,13 +11,9 @@
 
 <script type="text/html" id="tmpl-single">
 	<p><img src="{{data.src}}" /></p>
-	<table class="gif-details">
-		<tbody>
-			<tr>
-				<td><?php _e( 'Title:' ); ?></td>
-				<td><input class="title" type="text" value="{{data.title}}" /></td>
-			</tr>
-		</tbody>
-	</table>
-	<button class="save" type="button"><?php _e( 'Save' ); ?></button>
+	<p class="details">
+		<!--<button class="save" type="button"><?php _e( 'Save' ); ?></button>-->
+		<input class="title" type="text" value="{{data.title}}" />
+		<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
+	</p>
 </script>
