@@ -217,11 +217,12 @@
     };
 
     Images.prototype.findGifs = function(terms) {
-      var results, termWords;
-      termWords = terms.split(/[ -_]/);
+      var lastWord, results, termWords;
+      termWords = terms.split(/[ _-]/);
+      lastWord = _.last(termWords).toLowerCase();
       return results = this.allGifs.filter(function(model) {
         var termResults, termWord, titleWords, word, _i, _len;
-        titleWords = model.get('title').split(/[ -_]/);
+        titleWords = model.get('title').split(/[ _-]/);
         for (_i = 0, _len = titleWords.length; _i < _len; _i++) {
           word = titleWords[_i];
           termResults = (function() {
@@ -229,7 +230,11 @@
             _results = [];
             for (_j = 0, _len1 = termWords.length; _j < _len1; _j++) {
               termWord = termWords[_j];
-              _results.push(word.toLowerCase() === termWord.toLowerCase());
+              if (lastWord === termWord.toLowerCase()) {
+                _results.push(0 === word.toLowerCase().indexOf(lastWord));
+              } else {
+                _results.push(word.toLowerCase() === termWord.toLowerCase());
+              }
             }
             return _results;
           })();

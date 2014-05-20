@@ -131,11 +131,13 @@ class app.Images extends Backbone.Collection
 		@allGifs = new Backbone.Collection allGifs
 
 	findGifs: (terms) ->
-		termWords = terms.split /[ -_]/
+		termWords = terms.split /[ _-]/
+		lastWord = _.last(termWords).toLowerCase()
 		results = @allGifs.filter (model) ->
-			titleWords = model.get('title').split /[ -_]/
+			titleWords = model.get('title').split /[ _-]/
 			for word in titleWords
-				termResults = (word.toLowerCase() is termWord.toLowerCase() for termWord in termWords)
+				termResults = (for termWord in termWords
+					if lastWord is termWord.toLowerCase() then 0 is word.toLowerCase().indexOf(lastWord) else word.toLowerCase() is termWord.toLowerCase() )
 				termResults = _.filter termResults, (r) -> r
 				return true if termResults.length is termWords.length
 			false
