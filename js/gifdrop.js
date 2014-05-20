@@ -557,20 +557,48 @@
       click: 'click'
     };
 
-    ModalView.prototype.close = function() {
+    ModalView.prototype.keyup = function(e) {
       var subview, _i, _len, _ref;
-      _ref = this.views.get();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        subview = _ref[_i];
-        subview.trigger('modalClosing');
+      if (e.which === 27) {
+        _ref = this.views.get();
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subview = _ref[_i];
+          subview.trigger('modalClosing:esc');
+        }
+        return this.close();
       }
+    };
+
+    ModalView.prototype.close = function() {
       return this.$el.hide();
     };
 
     ModalView.prototype.click = function(e) {
+      var subview, _i, _len, _ref;
       if (this.el === e.target) {
+        _ref = this.views.get();
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subview = _ref[_i];
+          subview.trigger('modalClosing:click');
+        }
         return this.close();
       }
+    };
+
+    ModalView.prototype.ready = function() {
+      return $('body').on('keyup', (function(_this) {
+        return function(e) {
+          var subview, _i, _len, _ref;
+          if (e.which === 27) {
+            _ref = _this.views.get();
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              subview = _ref[_i];
+              subview.trigger('modalClosing:esc');
+            }
+            return _this.close();
+          }
+        };
+      })(this));
     };
 
     return ModalView;
@@ -589,23 +617,28 @@
     SingleView.prototype.className = 'modal-content';
 
     SingleView.prototype.events = {
-      'keypress input': 'keypress'
+      'keyup input': 'keyup'
     };
 
     SingleView.prototype.initialize = function() {
-      return this.listenTo(this, 'modalClosing', this.save);
+      return this.listenTo(this, 'modalClosing:click', this.save);
     };
 
     SingleView.prototype.save = function() {
       this.model.set({
         title: this.$title.val()
       });
+      console.log('Saving', this.$title.val());
       return this.model.save();
     };
 
-    SingleView.prototype.keypress = function(e) {
+    SingleView.prototype.keyup = function(e) {
       if (e.which === 13) {
         this.save();
+        this.views.parent.close();
+      }
+      if (e.which === 27) {
+        this.$title.val(this.model.get('title'));
         return this.views.parent.close();
       }
     };

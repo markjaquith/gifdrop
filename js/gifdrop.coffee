@@ -292,29 +292,45 @@ class app.ModalView extends app.View
 	events:
 		click: 'click'
 
+	keyup: (e) ->
+		if e.which is 27
+			subview.trigger 'modalClosing:esc' for subview in @views.get()
+			@close()
+
 	close: ->
-		subview.trigger 'modalClosing' for subview in @views.get()
 		@$el.hide()
 
 	click: (e) ->
-		@close() if @el is e.target
+		if @el is e.target
+			subview.trigger 'modalClosing:click' for subview in @views.get()
+			@close()
+
+	ready: ->
+		$('body').on 'keyup', (e) =>
+			if e.which is 27
+				subview.trigger 'modalClosing:esc' for subview in @views.get()
+				@close()
 
 class app.SingleView extends app.View
 	template: wp.template 'single'
 	className: 'modal-content'
 	events:
-		'keypress input': 'keypress'
+		'keyup input': 'keyup'
 
 	initialize: ->
-		@listenTo @, 'modalClosing', @save
+		@listenTo @, 'modalClosing:click', @save
 
 	save: ->
 		@model.set title: @$title.val()
+		console.log 'Saving', @$title.val()
 		@model.save()
 
-	keypress: (e) ->
+	keyup: (e) ->
 		if e.which is 13
 			@save()
+			@views.parent.close()
+		if e.which is 27
+			@$title.val @model.get 'title'
 			@views.parent.close()
 
 	postRender: ->
