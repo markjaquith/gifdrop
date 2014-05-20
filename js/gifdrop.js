@@ -213,40 +213,71 @@
         }
         return _results;
       })();
-      return this.filtered = new Backbone.Collection(allModels);
+      this.filtered = new Backbone.Collection(allModels);
+      return this.listenTo(this.filtered, 'change', this.changeMain);
+    };
+
+    Images.prototype.changeMain = function(model) {
+      return this.get(model).set(model.toJSON());
     };
 
     Images.prototype.findGifs = function(search) {
       var lastWord, results, termWords;
       if (search.length > 0) {
-        termWords = search.split(/[ _-]/);
-        lastWord = _.last(termWords).toLowerCase();
+        termWords = _.map(search.split(/[ _-]/), function(s) {
+          return s.toLowerCase();
+        });
+        lastWord = _.last(termWords);
         results = this.filter(function(model) {
-          var termResults, termWord, titleWords, word, _i, _len;
-          titleWords = model.get('title').split(/[ _-]/);
-          for (_i = 0, _len = titleWords.length; _i < _len; _i++) {
-            word = titleWords[_i];
-            termResults = (function() {
-              var _j, _len1, _results;
-              _results = [];
-              for (_j = 0, _len1 = termWords.length; _j < _len1; _j++) {
-                termWord = termWords[_j];
-                if (lastWord === termWord.toLowerCase()) {
-                  _results.push(0 === word.toLowerCase().indexOf(lastWord));
-                } else {
-                  _results.push(word.toLowerCase() === termWord.toLowerCase());
+          var termResults, termWord, titleWords;
+          titleWords = _.map(model.get('title').split(/[ _-]/), function(s) {
+            return s.toLowerCase();
+          });
+          termResults = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = termWords.length; _i < _len; _i++) {
+              termWord = termWords[_i];
+              _results.push((function(termWord) {
+                var found, regex, regexes, suffix, word, _j, _k, _len1, _len2;
+                regexes = (function() {
+                  var _j, _len1, _ref, _results1;
+                  _ref = ['s', 'es', 'ing'];
+                  _results1 = [];
+                  for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+                    suffix = _ref[_j];
+                    _results1.push(new RegExp(suffix + '$'));
+                  }
+                  return _results1;
+                })();
+                for (_j = 0, _len1 = titleWords.length; _j < _len1; _j++) {
+                  word = titleWords[_j];
+                  found = false;
+                  if (lastWord === termWord) {
+                    found = 0 === word.indexOf(lastWord);
+                  }
+                  if (!found) {
+                    found = word === termWord;
+                    for (_k = 0, _len2 = regexes.length; _k < _len2; _k++) {
+                      regex = regexes[_k];
+                      found || (found = word + suffix === termWord);
+                      found || (found = word === termWord + suffix);
+                      found || (found = word.replace(regex, '') === termWord);
+                      found || (found = word === termWord.replace(regex, ''));
+                    }
+                  }
+                  if (found) {
+                    return found;
+                  }
                 }
-              }
-              return _results;
-            })();
-            termResults = _.filter(termResults, function(r) {
-              return r;
-            });
-            if (termResults.length === termWords.length) {
-              return true;
+              })(termWord));
             }
-          }
-          return false;
+            return _results;
+          })();
+          termResults = _.filter(termResults, function(r) {
+            return r;
+          });
+          return termResults.length === termWords.length;
         });
       } else {
         results = this.models;

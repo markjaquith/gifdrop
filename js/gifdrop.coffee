@@ -129,19 +129,37 @@ class app.Images extends Backbone.Collection
 	initialize: (models) ->
 		allModels = (new app.Image model for model in models)
 		@filtered = new Backbone.Collection allModels
+		@listenTo @filtered, 'change', @changeMain
+
+	changeMain: (model) ->
+		@get(model).set model.toJSON()
 
 	findGifs: (search) ->
 		if search.length > 0
-			termWords = search.split /[ _-]/
-			lastWord = _.last(termWords).toLowerCase()
+			termWords = _.map search.split( /[ _-]/ ), (s) -> s.toLowerCase()
+			lastWord = _.last termWords
 			results = @filter (model) ->
-				titleWords = model.get('title').split /[ _-]/
-				for word in titleWords
-					termResults = (for termWord in termWords
-						if lastWord is termWord.toLowerCase() then 0 is word.toLowerCase().indexOf(lastWord) else word.toLowerCase() is termWord.toLowerCase() )
-					termResults = _.filter termResults, (r) -> r
-					return true if termResults.length is termWords.length
-				false
+				titleWords = _.map model.get('title').split( /[ _-]/ ), (s) -> s.toLowerCase()
+				termResults = (for termWord in termWords
+					((termWord) ->
+						regexes = ( new RegExp( suffix + '$' ) for suffix in ['s', 'es', 'ing' ] )
+						for word in titleWords
+							found = no
+							if lastWord is termWord
+								found = 0 is word.indexOf lastWord
+							unless found
+								found = word is termWord
+								for regex in regexes
+									found ||= word + suffix is termWord
+									found ||= word is termWord + suffix
+									found ||= word.replace( regex, '' ) is termWord
+									found ||= word is termWord.replace( regex, '' )
+							return found if found
+					)(termWord)
+				)
+				termResults = _.filter termResults, (r) -> r
+				# All input terms had a "hit"
+				termResults.length is termWords.length
 		else
 			results = @models
 		@filtered.reset results
