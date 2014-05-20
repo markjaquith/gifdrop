@@ -225,7 +225,6 @@ class app.ImagesListView extends app.View
 
 	filterIsotope: (collection, options ) ->
 		$("body").animate scrollTop: 0, 200
-		console.log options
 		if options?.all
 			filter = -> yes
 		else
