@@ -123,16 +123,17 @@ class app.Image extends Backbone.Model
 				model: JSON.stringify model.toJSON()
 			@_sync data, options
 
-class app.Images extends Backbone.Collection
+class app.ImageContainer extends Backbone.Collection
 	model: app.Image
 
+class app.Images extends app.ImageContainer
 	initialize: (models) ->
 		allModels = (new app.Image model for model in models)
-		@filtered = new Backbone.Collection allModels
+		@filtered = new app.ImageContainer allModels
 		@listenTo @filtered, 'change', @changeMain
 
 	changeMain: (model) ->
-		@get(model).set model.toJSON()
+		@get(model.get 'id').set model.toJSON()
 
 	findGifs: (search) ->
 		if search.length > 0
@@ -193,7 +194,7 @@ class app.ImagesListView extends app.View
 
 	initialize: ->
 		@setSubviews()
-		@listenTo @collection.filtered, 'add', @addNew
+		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
 		@listenTo @collection.filtered, 'reset', @filterIsotope
 
@@ -219,7 +220,7 @@ class app.ImagesListView extends app.View
 				_.contains( _.chain( collection.models ).map( (m) -> "gif-#{m.get 'id'}" ).value(), $(@).attr('id') )
 
 	setSubviews: ->
-		gifViews = _.map @collection.filtered.models, (gif) -> new app.ImageListView model: gif
+		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
 		@views.set gifViews
 
 	ready: -> $ => @masonry()
@@ -300,8 +301,7 @@ class app.SingleView extends app.View
 		'click button.save': 'save'
 
 	save: ->
-		@model.set
-			title: @$title.val()
+		@model.set title: @$title.val()
 		@model.save()
 
 	postRender: ->

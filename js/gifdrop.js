@@ -193,14 +193,25 @@
 
   })(Backbone.Model);
 
+  app.ImageContainer = (function(_super) {
+    __extends(ImageContainer, _super);
+
+    function ImageContainer() {
+      return ImageContainer.__super__.constructor.apply(this, arguments);
+    }
+
+    ImageContainer.prototype.model = app.Image;
+
+    return ImageContainer;
+
+  })(Backbone.Collection);
+
   app.Images = (function(_super) {
     __extends(Images, _super);
 
     function Images() {
       return Images.__super__.constructor.apply(this, arguments);
     }
-
-    Images.prototype.model = app.Image;
 
     Images.prototype.initialize = function(models) {
       var allModels, model;
@@ -213,12 +224,12 @@
         }
         return _results;
       })();
-      this.filtered = new Backbone.Collection(allModels);
+      this.filtered = new app.ImageContainer(allModels);
       return this.listenTo(this.filtered, 'change', this.changeMain);
     };
 
     Images.prototype.changeMain = function(model) {
-      return this.get(model).set(model.toJSON());
+      return this.get(model.get('id')).set(model.toJSON());
     };
 
     Images.prototype.findGifs = function(search) {
@@ -287,7 +298,7 @@
 
     return Images;
 
-  })(Backbone.Collection);
+  })(app.ImageContainer);
 
   app.MainView = (function(_super) {
     __extends(MainView, _super);
@@ -359,7 +370,7 @@
 
     ImagesListView.prototype.initialize = function() {
       this.setSubviews();
-      this.listenTo(this.collection.filtered, 'add', this.addNew);
+      this.listenTo(this.collection, 'add', this.addNew);
       this.listenTo(this, 'newView', this.animateItemIn);
       return this.listenTo(this.collection.filtered, 'reset', this.filterIsotope);
     };
@@ -406,7 +417,7 @@
 
     ImagesListView.prototype.setSubviews = function() {
       var gifViews;
-      gifViews = _.map(this.collection.filtered.models, function(gif) {
+      gifViews = _.map(this.collection.models, function(gif) {
         return new app.ImageListView({
           model: gif
         });
