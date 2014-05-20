@@ -26,6 +26,13 @@
       this.view.render();
       this.$wrapper.html(this.view.el);
       this.view.views.ready();
+      this.modalView.listenTo(this.modalView, 'modalOpen', function() {
+        return $('body').addClass('modal-open');
+      });
+      this.modalView.listenTo(this.modalView, 'modalClosed', function() {
+        $('body').removeClass('modal-open');
+        return $('input.search').focus();
+      });
       return this.initUploads();
     },
     initUploads: function() {
@@ -411,6 +418,9 @@
     };
 
     ImagesListView.prototype.filterIsotope = function(collection, options) {
+      $("body").animate({
+        scrollTop: 0
+      }, 200);
       return this.$el.isotope({
         filter: function() {
           return _.contains(_.chain(collection.models).map(function(m) {
@@ -497,7 +507,7 @@
       view = new app.SingleView({
         model: this.model
       });
-      app.modalView.$el.show();
+      app.modalView.open();
       app.modalView.views.set(view);
       return this.mouseout();
     };
@@ -569,8 +579,14 @@
       }
     };
 
+    ModalView.prototype.open = function() {
+      this.$el.show().addClass('open');
+      return this.trigger('modalOpen');
+    };
+
     ModalView.prototype.close = function() {
-      return this.$el.hide();
+      this.$el.hide().removeClass('open');
+      return this.trigger('modalClosed');
     };
 
     ModalView.prototype.click = function(e) {

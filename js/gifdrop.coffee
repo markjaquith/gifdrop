@@ -20,6 +20,12 @@ app = window.gifdropApp =
 		@$wrapper.html @view.el
 		@view.views.ready()
 
+		@modalView.listenTo @modalView, 'modalOpen', ->
+			$('body').addClass 'modal-open'
+		@modalView.listenTo @modalView, 'modalClosed', ->
+			$('body').removeClass 'modal-open'
+			$('input.search').focus()
+
 		@initUploads()
 
 	initUploads: ->
@@ -218,6 +224,7 @@ class app.ImagesListView extends app.View
 		@views.add view, options
 
 	filterIsotope: (collection, options ) ->
+		$("body").animate scrollTop: 0, 200
 		@$el.isotope
 			filter: ->
 				_.contains( _.chain( collection.models ).map( (m) -> "gif-#{m.get 'id'}" ).value(), $(@).attr('id') )
@@ -258,7 +265,7 @@ class app.ImageListView extends app.View
 
 	click: ->
 		view = new app.SingleView model: @model
-		app.modalView.$el.show()
+		app.modalView.open()
 		app.modalView.views.set view
 		@mouseout()
 
@@ -297,8 +304,13 @@ class app.ModalView extends app.View
 			subview.trigger 'modalClosing:esc' for subview in @views.get()
 			@close()
 
+	open: ->
+		@$el.show().addClass 'open'
+		@trigger 'modalOpen'
+
 	close: ->
-		@$el.hide()
+		@$el.hide().removeClass 'open'
+		@trigger 'modalClosed'
 
 	click: (e) ->
 		if @el is e.target
