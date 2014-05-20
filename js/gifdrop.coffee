@@ -33,10 +33,10 @@ app = window.gifdropApp =
 		uploadProgress = (uploader, file) ->
 			# $bar = $("#" + uploader.settings.drop_element + " .media-progress-bar div")
 			# $bar.width file.percent + "%"
-			console.log 'uploadProgress'
+			# console.log 'uploadProgress', uploader, file
 
 		uploadStart = (uploader) ->
-			console.log 'uploadStart'
+			# console.log 'uploadStart', uploader
 
 		uploadError = ->
 			alert 'error'
@@ -54,10 +54,6 @@ app = window.gifdropApp =
 				src: full.url
 				static: unanimated.url
 			app.images.add gif, at: 0
-
-		uploadFilesAdded = (uploader, files) ->
-			$.each files, (i, file) ->
-				uploader.removeFile file  if i > 0
 
 		uploader = new wp.Uploader
 			container: @$wrapper
@@ -80,7 +76,6 @@ app = window.gifdropApp =
 		if uploader.supports.dragdrop
 			uploader.uploader.bind "BeforeUpload", uploadStart
 			uploader.uploader.bind "UploadProgress", uploadProgress
-			uploader.uploader.bind "FilesAdded", uploadFilesAdded
 		else
 			uploader.uploader.destroy()
 			uploader = null
@@ -173,9 +168,11 @@ class app.Images extends app.ImageContainer
 				termResults = _.filter termResults, (r) -> r
 				# All input terms had a "hit"
 				termResults.length is termWords.length
+			options = {}
 		else
 			results = @models
-		@filtered.reset results
+			options = all: yes
+		@filtered.reset results, options
 
 class app.MainView extends app.View
 	className: 'wrapper'
@@ -228,9 +225,14 @@ class app.ImagesListView extends app.View
 
 	filterIsotope: (collection, options ) ->
 		$("body").animate scrollTop: 0, 200
-		@$el.isotope
-			filter: ->
+		console.log options
+		if options?.all
+			filter = -> yes
+		else
+			filter = ->
 				_.contains( _.chain( collection.models ).map( (m) -> "gif-#{m.get 'id'}" ).value(), $(@).attr('id') )
+		@$el.isotope
+			filter: filter
 
 	setSubviews: ->
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
