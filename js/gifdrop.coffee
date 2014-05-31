@@ -257,6 +257,11 @@ class app.ImagesListView extends app.View
 		@$el.isotope
 			layoutMode: 'masonry'
 			itemSelector: '.gif'
+			transitionDuration: '300ms'
+			visibleStyle:
+				opacity: 1
+			hiddenStyle:
+				opacity: 0
 			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
 				columnWidth: 320
