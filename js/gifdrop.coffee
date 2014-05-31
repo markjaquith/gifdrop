@@ -143,7 +143,7 @@ class app.Images extends app.ImageContainer
 		@get(model.get 'id').set model.toJSON()
 
 	_findGifs: (search) ->
-		console.log 'Searching for', search
+		# console.log 'Searching for', search
 		if search.length > 2
 			termWords = _.map search.split( /[ _-]/ ), (s) -> s.toLowerCase()
 			lastWord = _.last termWords
@@ -178,7 +178,7 @@ class app.Images extends app.ImageContainer
 	findGifs: (search) ->
 		@memoizedFindGifs ?= _.memoize @_findGifs
 		[results, options] = @memoizedFindGifs search
-		console.log 'Search results', results.length
+		# console.log 'Search results', results.length
 		unless _.isEqual @filtered.pluck('id'), _.pluck( results, 'id' )
 			@filtered.reset results, options
 
@@ -199,7 +199,9 @@ class app.ImageNavView extends app.View
 	_search: (terms) ->
 		@collection.findGifs terms
 
-	search: ->
+	search: (e) ->
+		if e.which is 27
+			@$search.val ''
 		@debouncedSearch ?= _.debounce @_search, 250
 		@debouncedSearch @$search.val()
 
@@ -332,7 +334,6 @@ class app.ModalView extends app.View
 
 	keyup: (e) ->
 		if e.which is 27
-			subview.trigger 'modalClosing:esc' for subview in @views.get()
 			@close()
 
 	open: ->
@@ -355,7 +356,6 @@ class app.ModalView extends app.View
 	ready: ->
 		$('body').on 'keyup', (e) =>
 			if e.which is 27
-				subview.trigger 'modalClosing:esc' for subview in @views.get()
 				@close()
 
 class app.SingleView extends app.View
