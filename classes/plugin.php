@@ -150,8 +150,8 @@ class GifDrop_Plugin {
 
 	protected function register_frontend_scripts() {
 		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'js/isotope.min.js', array('jquery'), '2.0.0' );
-		// wp_register_script( 'gifdrop-colorbox', $this->get_url() . 'js/jquery.colorbox.min.js', array('jquery'), '1.5.9' );
-		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope' ), '0.1' );
+		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'js/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
+		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload' ), '0.1' );
 	}
 
 	protected function register_frontend_styles() {

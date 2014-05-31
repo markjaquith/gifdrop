@@ -1,7 +1,7 @@
 <?php defined('WPINC') or die; ?>
 
 <script type="text/html" id="tmpl-gif">
-<img src="{{data.static}}" width="{{data.imgWidth}}" height="{{data.imgHeight}}" />
+<img data-original="{{data.static}}" width="{{data.imgWidth}}" height="{{data.imgHeight}}" />
 </script>
 
 <script type="text/html" id="tmpl-nav">

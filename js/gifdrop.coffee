@@ -143,7 +143,7 @@ class app.Images extends app.ImageContainer
 		@get(model.get 'id').set model.toJSON()
 
 	findGifs: (search) ->
-		if search.length > 0
+		if search.length > 2
 			termWords = _.map search.split( /[ _-]/ ), (s) -> s.toLowerCase()
 			lastWord = _.last termWords
 			results = @filter (model) ->
@@ -188,8 +188,12 @@ class app.ImageNavView extends app.View
 		'keyup input.search': 'search'
 	lastSearch: ''
 
-	search: ->
+	_search: ->
 		@collection.findGifs @$search.val()
+
+	search: ->
+		@debouncedSearch ?= _.debounce @_search, 250
+		@debouncedSearch()
 
 	postRender: ->
 		@$search = @$ 'input.search'
@@ -225,11 +229,13 @@ class app.ImagesListView extends app.View
 
 	filterIsotope: (collection, options ) ->
 		$("body").animate scrollTop: 0, 200
+		ids = collection.pluck 'id'
 		if options?.all
 			filter = -> yes
 		else
 			filter = ->
-				_.contains( _.chain( collection.models ).map( (m) -> "gif-#{m.get 'id'}" ).value(), $(@).attr('id') )
+				_.contains( _.chain( ids ).map( (id) -> "gif-#{id}" ).value(), $(@).attr('id') )
+		view.trigger 'loadImage' for view in @views.get() when _.contains( ids, view.model.get('id') )
 		@$el.isotope
 			filter: filter
 
@@ -256,6 +262,10 @@ class app.ImageListView extends app.View
 		mouseover: 'mouseover'
 		mouseout: 'mouseout'
 		click: 'click'
+
+	initialize: ->
+		@listenTo @, 'loadImage', @loadImage
+
 	attributes: ->
 		id: "gif-#{@model.get 'id'}"
 
@@ -290,11 +300,15 @@ class app.ImageListView extends app.View
 	crop: ->
 		@$el.css height: "#{@model.get 'divHeight'}px"
 
+	loadImage: ->
+		@$img.trigger 'appear'
+
 	postRender: ->
 		@crop()
 		@$img = @$ '> img'
 
 	ready: ->
+		@$img.show().lazyload()
 		@views.parent.trigger 'newView', @model, @$el
 
 class app.ModalView extends app.View
