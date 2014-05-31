@@ -142,7 +142,8 @@ class app.Images extends app.ImageContainer
 	changeMain: (model) ->
 		@get(model.get 'id').set model.toJSON()
 
-	findGifs: (search) ->
+	_findGifs: (search) ->
+		console.log 'Searching for', search
 		if search.length > 2
 			termWords = _.map search.split( /[ _-]/ ), (s) -> s.toLowerCase()
 			lastWord = _.last termWords
@@ -172,7 +173,14 @@ class app.Images extends app.ImageContainer
 		else
 			results = @models
 			options = all: yes
-		@filtered.reset results, options
+		[results, options]
+
+	findGifs: (search) ->
+		@memoizedFindGifs ?= _.memoize @_findGifs
+		[results, options] = @memoizedFindGifs search
+		console.log 'Search results', results.length
+		unless _.isEqual @filtered.pluck('id'), _.pluck( results, 'id' )
+			@filtered.reset results, options
 
 class app.MainView extends app.View
 	className: 'wrapper'
@@ -188,12 +196,12 @@ class app.ImageNavView extends app.View
 		'keyup input.search': 'search'
 	lastSearch: ''
 
-	_search: ->
-		@collection.findGifs @$search.val()
+	_search: (terms) ->
+		@collection.findGifs terms
 
 	search: ->
 		@debouncedSearch ?= _.debounce @_search, 250
-		@debouncedSearch()
+		@debouncedSearch @$search.val()
 
 	postRender: ->
 		@$search = @$ 'input.search'
@@ -236,8 +244,7 @@ class app.ImagesListView extends app.View
 			filter = ->
 				_.contains( _.chain( ids ).map( (id) -> "gif-#{id}" ).value(), $(@).attr('id') )
 		view.trigger 'loadImage' for view in @views.get() when _.contains( ids, view.model.get('id') )
-		@$el.isotope
-			filter: filter
+		@$el.isotope filter: filter
 
 	setSubviews: ->
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
