@@ -323,6 +323,7 @@ class app.ModalView extends app.View
 		id: 'modal'
 	events:
 		click: 'click'
+		'click a.dashicons-dismiss': 'clickClose'
 
 	keyup: (e) ->
 		if e.which is 27
@@ -336,6 +337,10 @@ class app.ModalView extends app.View
 	close: ->
 		@$el.hide().removeClass 'open'
 		@trigger 'modalClosed'
+
+	clickClose: (e) ->
+		e.preventDefault()
+		@close()
 
 	click: (e) ->
 		if @el is e.target
