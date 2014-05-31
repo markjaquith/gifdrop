@@ -155,7 +155,7 @@ class GifDrop_Plugin {
 	}
 
 	protected function register_frontend_styles() {
-		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array(), '0.1' );
+		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array( 'dashicons' ), '0.1' );
 	}
 
 	protected function only_some_attachment_fields( &$attachment ) {

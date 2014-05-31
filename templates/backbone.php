@@ -13,7 +13,7 @@
 	<p><img src="{{data.src}}" /></p>
 	<p class="details">
 		<!--<button class="save" type="button"><?php _e( 'Save' ); ?></button>-->
-		<input class="title" type="text" value="{{data.title}}" />
+		<span class="dashicons dashicons-tag"></span><input class="title" type="text" value="{{data.title}}" />
 		<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
 	</p>
 </script>
