@@ -354,6 +354,3 @@ class app.SingleView extends app.View
 
 	ready: ->
 		@$title.focus().val(@$title.val())
-
-
-$ -> app.init()
