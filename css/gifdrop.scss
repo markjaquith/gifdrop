@@ -137,6 +137,11 @@ input {
 	}
 }
 
+.modal-content-inner {
+	height: 400px;
+	overflow: auto;
+}
+
 .details {
 	position: relative;
 	width: 100%;

@@ -11,10 +11,12 @@
 
 <script type="text/html" id="tmpl-single">
 	<a href="#" class="dashicons dashicons-dismiss"></a>
-	<p><img src="{{data.src}}" /></p>
-	<p class="details">
-		<!--<button class="save" type="button"><?php _e( 'Save' ); ?></button>-->
-		<span class="dashicons dashicons-tag"></span><input class="title" type="text" value="{{data.title}}" />
-		<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
-	</p>
+	<div class="modal-content-inner">
+		<p><img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" /></p>
+		<p class="details">
+			<!--<button class="save" type="button"><?php _e( 'Save' ); ?></button>-->
+			<span class="dashicons dashicons-tag"></span><input class="title" type="text" value="{{data.title}}" />
+			<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
+		</p>
+	</div>
 </script>

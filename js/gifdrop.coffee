@@ -380,8 +380,14 @@ class app.SingleView extends app.View
 			@$title.val @model.get 'title'
 			@views.parent.close()
 
+	resize: =>
+		@$contentInner.css height: "#{$(window).height() - 120}px"
+
 	postRender: ->
 		@$title = @$ 'input.title'
+		@$contentInner = @$ '.modal-content-inner'
+		@resize()
 
 	ready: ->
 		@$title.focus().val(@$title.val())
+		$(window).on 'resize', _.throttle( @resize, 50 )
