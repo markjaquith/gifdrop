@@ -221,7 +221,7 @@ class GifDrop_Plugin {
 			$editor = wp_get_image_editor( $file );
 			if ( ! is_wp_error( $editor ) ) {
 				// Flip the image twice
-				// The first flip flips the images and boils it down to the first gif frame
+				// The first flip flips the image and boils it down to the first gif frame
 				// The second flip restores it to its original orientation
 				$editor->flip( true, false );
 				$editor->flip( true, false );
