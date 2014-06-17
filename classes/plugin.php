@@ -260,7 +260,7 @@ class GifDrop_Plugin {
 
 		$folder_args	= array(
 			'labels'              => $folder_labels,
-			'public'              => true,
+			'public'              => false,
 			'show_in_nav_menus'   => false,
 			'show_ui'             => false,
 			'publicly_queryable'  => true,
@@ -268,7 +268,7 @@ class GifDrop_Plugin {
 			'show_admin_column'   => true,
 			'show_tagcloud'       => false,
 			'hierarchical'        => false,
-			'query_var'           => true,
+			'query_var'           => false,
 			'rewrite'             => false,
 		);
 
