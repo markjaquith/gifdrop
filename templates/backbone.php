@@ -12,9 +12,9 @@
 <script type="text/html" id="tmpl-single">
 	<a href="#" class="dashicons dashicons-dismiss"></a>
 	<div class="modal-content-inner">
-		<p><img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" /></p>
+		<p><img src="{{data.src}}" data-clipboard-text="{{data.src}}" width="{{data.width}}" height="{{data.height}}" /></p>
+		<button class="copy" type="button" data-copied-message="<?php esc_attr_e( 'Copied!', 'gifdrop' ); ?>"><?php _e( 'Copy URL', 'gifdrop' ); ?></button>
 		<p class="details">
-			<!--<button class="save" type="button"><?php _e( 'Save' ); ?></button>-->
 			<span class="dashicons dashicons-tag"></span><input class="title" type="text" value="{{data.title}}" />
 			<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
 		</p>

@@ -9,7 +9,11 @@ body {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-input {
+p {
+	margin: 0
+}
+
+input, button {
 	border: 1px solid #cccccc;
 	@include border-radius(2px);
 	&:focus {
@@ -140,6 +144,15 @@ input {
 .modal-content-inner {
 	height: 400px;
 	overflow: auto;
+	button.copy {
+		font-size: 14px;
+		padding: 6px;
+		background: #eee;
+		cursor: pointer;
+	}
+	img {
+		cursor: pointer;
+	}
 }
 
 .details {
@@ -147,6 +160,7 @@ input {
 	width: 100%;
 	font-size: 18px;
 	text-align: left;
+	margin-top: 20px;
 	span.dashicons-tag {
 		position: absolute;
 		top: 9px;
@@ -166,17 +180,5 @@ input {
 		letter-spacing: 0.15em;
 		font-size: 12px;
 		color: #bbbbbb;
-	}
-	button {
-		text-transform: uppercase;
-		font-weight: bold;
-		width: 15%;
-		float: right;
-		padding: 6px 10px;
-		border: 1px solid #cccccc;
-		font-size: 18px;
-		background: #eeeeff;
-		@include border-radius(3px);
-		@include box-shadow(#dddddd 2px 2px 10px inset);
 	}
 }

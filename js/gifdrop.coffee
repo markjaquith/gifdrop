@@ -383,9 +383,18 @@ class app.SingleView extends app.View
 	resize: =>
 		@$contentInner.css height: "#{$(window).height() - 120}px"
 
+	alertCopied: =>
+		@$copyButton.html @$copyButton.data 'copied-message'
+
 	postRender: ->
 		@$title = @$ 'input.title'
 		@$contentInner = @$ '.modal-content-inner'
+		@imgClipboard = new ZeroClipboard @$contentInner.find( 'img' ).get(0)
+		@imgClipboard.on 'aftercopy', @alertCopied
+		@$copyButton = @$contentInner.find 'button.copy'
+		@$copyButton.css width: @model.get 'width'
+		@buttonClipboard = new ZeroClipboard @$copyButton.get(0)
+		@buttonClipboard.on 'aftercopy', @alertCopied
 		@resize()
 
 	ready: ->
