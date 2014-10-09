@@ -14,7 +14,7 @@ class GifDrop_Plugin {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'folders' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'admin_init', array( $this, 'file_location' ) );
+		add_action( 'admin_init', array( $this, 'change_upload_dir' ), 999 );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'metadata_filter', ), 10, 2 );
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
@@ -49,11 +49,11 @@ class GifDrop_Plugin {
 		add_action( 'admin_post_gifdrop-save', array( $this, 'save' ) );
 	}
 
-	public function file_location() {
+	public static function create_upload_dir() {
 		// fetch the base uploads dir
 		$uploads	= wp_upload_dir();
 		// set our new directory
-		$basedir	= $uploads['basedir'].'/gifdrop/';
+		$basedir	= $uploads['basedir'] . '/gifdrop/';
 		// check if folder exists. if not, make it
 		if ( ! is_dir( $basedir ) ) {
 			mkdir( $basedir );
@@ -61,6 +61,23 @@ class GifDrop_Plugin {
 			@chmod( $basedir, 0755 );
 		}
 
+	}
+
+ 	public function set_upload_dir( $upload ) {
+ 		$upload['subdir'] = '/gifdrop/';
+ 		$upload['path']   = $upload['basedir'] . $upload['subdir'];
+ 		$upload['url']    = $upload['baseurl'] . $upload['subdir'];
+ 		return $upload;
+ 	}
+
+	public function change_upload_dir() {
+		global $pagenow;
+		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' == $pagenow ) ) {
+			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
+				self::create_upload_dir();
+				add_filter( 'upload_dir', array( $this, 'set_upload_dir' ) );
+			}
+		}
 	}
 
 	public function admin_menu() {
@@ -211,6 +228,10 @@ class GifDrop_Plugin {
 			}
 		}
 		return $template;
+	}
+
+	protected function check_page_id( $post_id = 0 ) {
+		return get_post_meta( $post_id, '_gifdrop_enabled', true ) ? true : false;
 	}
 
 	protected function get_page_ids() {
