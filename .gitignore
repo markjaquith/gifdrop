@@ -1,3 +1,4 @@
 .sass-cache
 .codekit-cache
 .DS_Store
+/vendor/zeroclipboard/zeroclipboard/test/
