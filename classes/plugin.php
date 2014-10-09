@@ -85,12 +85,55 @@ class GifDrop_Plugin {
 		}
 	}
 
-	public function sanitize_path( $path ) {
-		return sanitize_title_with_dashes( $path );
+	protected function unsandwich_slashes( $string ) {
+		// Remove leading slashes
+		$string = preg_replace( '#^/+#', '', $string );
+		// And trailing slashes
+		$string = untrailingslashit( $string );
+		return $string;
+	}
+
+	protected function sanitize_path( $path ) {
+		// Remove leading/trailing slashes
+		$path = $this->unsandwich_slashes( $path );
+		// Lowercase
+		$path = strtolower( $path );
+		// Only a-z, 0-9, slash and dash
+		$path = preg_replace( '#[^a-z0-9/-]#', '', $path );
+		return $path;
+	}
+
+	protected function sanitize_slug( $path ) {
+		// Do the path sanitization first (removes leading/trailing slashes and more)
+		$path = $this->sanitize_path( $path );
+		// Make other slashes into a dash so experts/exchange doesn't become expertsexchange
+		$path = str_replace( '/', '-', $path );
+		// Run it through the WP dashing function
+		$path = sanitize_title_with_dashes( $path );
+		if ( '' === $path ) {
+			// Special string because can't match blank strings in the query engine
+			$path = 'gifdrop-on-site-root';
+		}
+		return $path;
+	}
+
+	protected function path_regex() {
+		$path = $this->get_option( 'path' );
+		$path = trailingslashit( $this->sanitize_path( $path ) );
+		if ( '/' === $path ) {
+			$path = '$';
+		} else {
+			$path .= '?$';
+		}
+		return $path;
+	}
+
+	protected function path_slug() {
+		return $this->sanitize_slug( $this->get_option( 'path' ) );
 	}
 
 	public function inject_rewrite_rules( $rules ) {
-		$rules[trailingslashit( $this->get_option( 'path' ) ) . '?$'] = 'index.php?&gifdrop=' . $this->sanitize_path( $this->get_option( 'path' ) );
+		$rules[$this->path_regex()] = 'index.php?&gifdrop=' . $this->path_slug();
 		return $rules;
 	}
 
@@ -227,12 +270,12 @@ class GifDrop_Plugin {
 
 		$old_path = $this->get_option( 'path' );
 		if ( $_post['gifdrop_path'] !== $old_path ) {
-			$new_path = $_post['gifdrop_path'];
+			$new_path = $this->sanitize_path( $_post['gifdrop_path'] );
 			$page_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_type = 'gifdrop'" );
 			wp_update_post( array(
 				'ID' => absint( $page_id ),
-				'post_title' => $new_path,
-				'post_name' => $this->sanitize_path( $new_path ),
+				'post_title' => 'GifDrop: ' . trailingslashit( $new_path ),
+				'post_name' => $this->sanitize_slug( $new_path ),
 			));
 			$this->set_option( 'path', $new_path );
 		}
@@ -302,25 +345,6 @@ class GifDrop_Plugin {
 
 	protected function is_gifdrop_page( $post_id = 0 ) {
 		return 'gifdrop' === get_post_type( $post_id );
-	}
-
-	protected function get_page_ids() {
-		global $wpdb;
-		$pages = $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_gifdrop_enabled'" );
-		$pages = $pages ? array_map( 'intval', $pages ) : array();
-		return $pages;
-	}
-
-	protected function get_all_pages() {
-		$all_pages = get_pages();
-		$pages_out = array();
-		foreach ( $all_pages as $page ) {
-			$pages_out[] = (object) array(
-				'id' => intval( $page->ID ),
-				'title' => apply_filters( 'the_title', $page->post_title, $page->ID )
-			);
-		}
-		return $pages_out;
 	}
 
 	public function metadata_filter( $metadata, $attachment_id ) {

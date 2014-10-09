@@ -11,6 +11,7 @@
 				<td class="gifdrop-select-pages-section">
 					<?php echo home_url( '/' ); ?><input type="text" id="gifdrop-path" name="gifdrop_path" value="<?php echo esc_attr( $this->get_option( 'path' ) ); ?>" />
 					<p class="description"><?php _e( 'The URL on your site where you want your gif collection to be available.', 'gifdrop' ); ?></p>
+					<p class="description"><?php _e( '(If this is blank, the front of your site will be your gif collection!)', 'gifdrop' ); ?></p>
 				</td>
 			</tr>
 		</table>
