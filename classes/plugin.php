@@ -8,7 +8,6 @@ class GifDrop_Plugin {
 	const NONCE = 'gifdrop_save';
 
 	protected function __construct( $__FILE__ ) {
-		self::$instance = $this;
 		$this->__FILE__ = $__FILE__;
 		$this->base = dirname( dirname( __FILE__ ) );
 		add_action( 'init', array( $this, 'init' ) );
@@ -24,7 +23,7 @@ class GifDrop_Plugin {
 
 	public static function get_instance( $__FILE__ = null ) {
 		if ( ! isset( self::$instance ) ) {
-			new self( $__FILE__ );
+			self::$instance = new self( $__FILE__ );
 		}
 		return self::$instance;
 	}
@@ -73,10 +72,12 @@ class GifDrop_Plugin {
 
 	protected function maybe_create_gifdrop() {
 		if ( ! $this->get_option( 'created_page' ) ) {
+			$path = 'gifs';
+			$this->set_option( 'path', $path );
 			wp_insert_post( array(
 				'post_type' => 'gifdrop',
-				'post_title' => 'gifs',
-				'post_name' => 'gifs',
+				'post_title' => $path,
+				'post_name' => $path,
 				'post_status' => 'publish',
 			));
 			$this->set_option( 'created_page', true );
@@ -84,12 +85,12 @@ class GifDrop_Plugin {
 		}
 	}
 
-	public function get_rewrite_path() {
-		return 'gifs';
+	public function sanitize_path( $path ) {
+		return sanitize_title_with_dashes( $path );
 	}
 
 	public function inject_rewrite_rules( $rules ) {
-		$rules[trailingslashit($this->get_rewrite_path()) . '?$'] = 'index.php?&gifdrop=gifs';
+		$rules[trailingslashit( $this->get_option( 'path' ) ) . '?$'] = 'index.php?&gifdrop=' . $this->sanitize_path( $this->get_option( 'path' ) );
 		return $rules;
 	}
 
@@ -120,8 +121,8 @@ class GifDrop_Plugin {
 	public function change_upload_dir() {
 		global $pagenow;
 		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' === $pagenow ) ) {
-			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
-				self::create_upload_dir();
+			if ( $this->is_gifdrop_page( absint( $_REQUEST['post_id'] ) ) ) {
+				$this->create_upload_dir();
 				add_filter( 'upload_dir', array( $this, 'set_upload_dir' ) );
 			}
 		}
@@ -130,10 +131,10 @@ class GifDrop_Plugin {
 	public function filename( $filename, $filename_raw ) {
 		global $pagenow;
 		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' == $pagenow ) ) {
-			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
+			if ( $this->is_gifdrop_page( absint( $_REQUEST['post_id'] ) ) ) {
 				$info = pathinfo( $filename );
 				$ext  = empty( $info['extension'] ) ? '' : '.' . $info['extension'];
-				return self::increment_id() . $ext;
+				return $this->increment_id() . $ext;
 			}
 		}
 	}
@@ -146,6 +147,7 @@ class GifDrop_Plugin {
 	public function load() {
 		if ( isset( $_GET['updated'] ) ) {
 			add_action( 'admin_notices', array( $this, 'updated' ) );
+			flush_rewrite_rules();
 		}
 
 		add_action ( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
@@ -190,7 +192,7 @@ class GifDrop_Plugin {
 	}
 
 	public function admin_enqueue_scripts() {
-		wp_enqueue_script( 'gifdrop-settings', $this->get_url() . 'js/admin.js', array( 'jquery', 'wp-backbone' ), '0.1' );
+		wp_enqueue_script( 'gifdrop-settings', $this->get_url() . 'js/admin.js', array( 'jquery' ), '0.2' );
 	}
 
 	public function admin_page() {
@@ -218,22 +220,21 @@ class GifDrop_Plugin {
 	}
 
 	public function save() {
+		global $wpdb;
 		current_user_can( 'manage_options' ) || die;
 		check_admin_referer( self::NONCE );
 		$_post = stripslashes_deep( $_POST );
 
-		$pages = $this->get_page_ids();
-		$new_pages = isset( $_post['gifdrop_enabled'] ) ? array_map( 'intval', $_post['gifdrop_enabled'] ) : array();
-
-		$remove = array_values( array_diff( $pages, $new_pages ) );
-		$add = array_values( array_diff( $new_pages, $pages ) );
-
-		foreach ( $remove as $post_id ) {
-			delete_post_meta( $post_id, '_gifdrop_enabled' );
-		}
-
-		foreach ( $add as $post_id ) {
-			update_post_meta( $post_id, '_gifdrop_enabled', 'enabled' );
+		$old_path = $this->get_option( 'path' );
+		if ( $_post['gifdrop_path'] !== $old_path ) {
+			$new_path = $_post['gifdrop_path'];
+			$page_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_type = 'gifdrop'" );
+			wp_update_post( array(
+				'ID' => absint( $page_id ),
+				'post_title' => $new_path,
+				'post_name' => $this->sanitize_path( $new_path ),
+			));
+			$this->set_option( 'path', $new_path );
 		}
 
 		wp_redirect( $this->admin_url() . '&updated=true' );
@@ -265,7 +266,7 @@ class GifDrop_Plugin {
 
 	public function template_include( $template ) {
 		if ( is_singular() ) {
-			if ( 'gifdrop' === get_post_type( get_queried_object_id() ) ) {
+			if ( $this->is_gifdrop_page( get_queried_object_id() ) ) {
 				$this->register_frontend_scripts();
 				$this->register_frontend_styles();
 				$images = get_posts( array(
@@ -299,8 +300,8 @@ class GifDrop_Plugin {
 		return base_convert( $current, 10, 36 );
 	}
 
-	protected function check_page_id( $post_id = 0 ) {
-		return get_post_meta( $post_id, '_gifdrop_enabled', true ) ? true : false;
+	protected function is_gifdrop_page( $post_id = 0 ) {
+		return 'gifdrop' === get_post_type( $post_id );
 	}
 
 	protected function get_page_ids() {
