@@ -1,11 +1,11 @@
 # GifDrop #
 Contributors: markjaquith, norcross  
-Requires at least: 3.8  
+Requires at least: 4.0  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 Stable tag: trunk  
 
-Store, organize, and share your Gifs, right in WordPress
+Store, organize, and share your gifs, right in WordPress
 
 ## Description ##
 
@@ -13,7 +13,7 @@ Create a repository for your collection of gif images. Easily upload, quickly fi
 
 ### Contributing ###
 
-Pull requests and issues on [GitHub](https://github.com/markjaquith/gifdrop) welcome.
+Pull requests and bug reports on [GitHub](https://github.com/markjaquith/gifdrop) welcome.
 
 ## Installation ##
 
@@ -25,9 +25,13 @@ GifDrop is most easily installed automatically via the Plugins tab in your dashb
 
 Sure.
 
+### Can I make my whole WordPress site a gif repository? ###
+
+Sure can. You choose where it lives, and it can live at the site root.
+
 ## Screenshots ##
 
-1. GifPress list page
+1. GifDrop list page
 
 ## Changelog ##
 
