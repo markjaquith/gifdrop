@@ -202,7 +202,7 @@ class GifDrop_Plugin {
 				));
 				array_walk( $images, array( $this, 'only_some_attachment_fields' ) );
 				wp_localize_script( 'gifdrop', 'gifdropSettings', array(
-					'id' => get_queried_object_id(),
+					'id' => (int) get_queried_object_id(),
 					'nonce' => wp_create_nonce( 'gifdrop_' . get_queried_object_id() ),
 					'attachments' => $images,
 				));
