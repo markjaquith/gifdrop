@@ -7,10 +7,11 @@
   app = window.gifDropAdmin = {
     init: function() {
       return $('#gifdrop-path').keypress(function(e) {
-        var key;
+        var allowed, key, keyString;
         key = e.which;
-        console.log(key);
-        if (!(key === 45 || key === 47 || key === 13 || (96 < key && key < 123) || (47 < key && key < 58))) {
+        keyString = String.fromCharCode(key);
+        allowed = /^[a-zA-Z0-9\/-]$/;
+        if (!(key === 0 || key === 8 || keyString === '' || keyString.match(allowed))) {
           return false;
         }
       });
