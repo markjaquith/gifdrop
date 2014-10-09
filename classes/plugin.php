@@ -12,7 +12,6 @@ class GifDrop_Plugin {
 		$this->__FILE__ = $__FILE__;
 		$this->base = dirname( dirname( __FILE__ ) );
 		add_action( 'init', array( $this, 'init' ) );
-		add_action( 'init', array( $this, 'folders' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_init', array( $this, 'change_upload_dir' ), 999 );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
@@ -275,45 +274,6 @@ class GifDrop_Plugin {
 			$sizes['full-gif-static'] = __( 'Full Size (non-animated)', 'gifdrop' );
 		}
 		return $sizes;
-	}
-
-	public function folders() {
-
-		$folder_labels	= array(
-			'name'                       => __( 'Folders', 'gifdrop' ),
-			'singular_name'              => __( 'Folder', 'gifdrop' ),
-			'menu_name'                  => __( 'Folders', 'gifdrop' ),
-			'search_items'               => __( 'Search folders', 'gifdrop' ),
-			'popular_items'              => __( 'Popular folders', 'gifdrop' ),
-			'all_items'                  => __( 'All folders', 'gifdrop' ),
-			'edit_item'                  => __( 'Edit folder', 'gifdrop' ),
-			'update_item'                => __( 'Update folder', 'gifdrop' ),
-			'add_new_item'               => __( 'Add new folder', 'gifdrop' ),
-			'new_item_name'              => __( 'New folder', 'gifdrop' ),
-			'add_or_remove_items'        => __( 'Add or remove folder', 'gifdrop' ),
-			'choose_from_most_used'      => __( 'Choose from the most used folders', 'gifdrop' ),
-			'separate_items_with_commas' => __( 'Separate folders with commas', 'gifdrop' ),
-		);
-
-		$folder_args	= array(
-			'labels'              => $folder_labels,
-			'public'              => false,
-			'show_in_nav_menus'   => false,
-			'show_ui'             => false,
-			'publicly_queryable'  => true,
-			'exclude_from_search' => true,
-			'show_admin_column'   => true,
-			'show_tagcloud'       => false,
-			'hierarchical'        => false,
-			'query_var'           => false,
-			'rewrite'             => false,
-		);
-
-		// run the args through a filter
-		$folder_args	= apply_filters( 'gifdrop_folder_args', $folder_args );
-
-		// register the taxonomy
-		register_taxonomy( 'folder', array( 'attachment' ), $folder_args );
 	}
 
 }
