@@ -17,6 +17,7 @@ class GifDrop_Plugin {
 		add_filter( 'template_include', array( $this, 'template_include' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'metadata_filter', ), 10, 2 );
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
+		add_filter( 'sanitize_file_name', array( $this, 'filename' ), 10, 2 );
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
 
 	}
@@ -62,7 +63,7 @@ class GifDrop_Plugin {
 	}
 
  	public function set_upload_dir( $upload ) {
- 		$upload['subdir'] = '/gifdrop/';
+ 		$upload['subdir'] = '/gifdrop';
  		$upload['path']   = $upload['basedir'] . $upload['subdir'];
  		$upload['url']    = $upload['baseurl'] . $upload['subdir'];
  		return $upload;
@@ -74,6 +75,17 @@ class GifDrop_Plugin {
 			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
 				self::create_upload_dir();
 				add_filter( 'upload_dir', array( $this, 'set_upload_dir' ) );
+			}
+		}
+	}
+
+	public function filename( $filename, $filename_raw ) {
+		global $pagenow;
+		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' == $pagenow ) ) {
+			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
+				$info = pathinfo( $filename );
+				$ext  = empty( $info['extension'] ) ? '' : '.' . $info['extension'];
+				return self::increment_id() . $ext;
 			}
 		}
 	}
@@ -226,6 +238,17 @@ class GifDrop_Plugin {
 			}
 		}
 		return $template;
+	}
+
+	protected function increment_id() {
+		// set our option first with non autoloading
+		add_option( 'gifdrop_filename_count', 1, '', 'no' );
+		// now get our option
+		$current = absint( get_option( 'gifdrop_filename_count' ) );
+		// update the counter first
+		update_option( 'gifdrop_filename_count', $current + 1 );
+		// return the value base32 encoded
+		return base_convert( $current, 10, 36 );
 	}
 
 	protected function check_page_id( $post_id = 0 ) {
