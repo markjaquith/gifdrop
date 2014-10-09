@@ -14,10 +14,12 @@ class GifDrop_Plugin {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'folders' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_init', array( $this, 'file_location' ) );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'metadata_filter', ), 10, 2 );
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
+
 	}
 
 	public static function get_instance( $__FILE__ = null ) {
@@ -45,6 +47,20 @@ class GifDrop_Plugin {
 
 	public function admin_init() {
 		add_action( 'admin_post_gifdrop-save', array( $this, 'save' ) );
+	}
+
+	public function file_location() {
+		// fetch the base uploads dir
+		$uploads	= wp_upload_dir();
+		// set our new directory
+		$basedir	= $uploads['basedir'].'/gifdrop/';
+		// check if folder exists. if not, make it
+		if ( ! is_dir( $basedir ) ) {
+			mkdir( $basedir );
+			// set the CHMOD in case
+			@chmod( $basedir, 0755 );
+		}
+
 	}
 
 	public function admin_menu() {
