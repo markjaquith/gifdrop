@@ -381,7 +381,7 @@ class app.SingleView extends app.View
 			@views.parent.close()
 
 	resize: =>
-		@$contentInner.css height: "#{$(window).height() - 120}px"
+		@$contentInner.css height: "#{_.min [$(window).height() - 120, @model.get('height') + 130 ]}px"
 
 	alertCopied: =>
 		@$copyButton.html @$copyButton.data 'copied-message'
