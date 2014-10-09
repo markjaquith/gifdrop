@@ -50,16 +50,15 @@ class GifDrop_Plugin {
 
 	public static function create_upload_dir() {
 		// fetch the base uploads dir
-		$uploads	= wp_upload_dir();
+		$uploads = wp_upload_dir();
 		// set our new directory
-		$basedir	= $uploads['basedir'] . '/gifdrop/';
+		$basedir = $uploads['basedir'] . '/gifdrop/';
 		// check if folder exists. if not, make it
 		if ( ! is_dir( $basedir ) ) {
 			mkdir( $basedir );
 			// set the CHMOD in case
 			@chmod( $basedir, 0755 );
 		}
-
 	}
 
  	public function set_upload_dir( $upload ) {
@@ -71,7 +70,7 @@ class GifDrop_Plugin {
 
 	public function change_upload_dir() {
 		global $pagenow;
-		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' == $pagenow ) ) {
+		if ( ! empty( $_REQUEST['post_id'] ) && ( 'async-upload.php' === $pagenow ) ) {
 			if ( self::check_page_id( absint( $_REQUEST['post_id'] ) ) ) {
 				self::create_upload_dir();
 				add_filter( 'upload_dir', array( $this, 'set_upload_dir' ) );
@@ -275,5 +274,4 @@ class GifDrop_Plugin {
 		}
 		return $sizes;
 	}
-
 }
