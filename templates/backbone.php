@@ -1,4 +1,4 @@
-<?php defined('WPINC') or die; ?>
+<?php defined( 'WPINC' ) or die; ?>
 
 <script type="text/html" id="tmpl-gif">
 <img data-original="{{data.static}}" width="{{data.imgWidth}}" height="{{data.imgHeight}}" />

@@ -1,6 +1,5 @@
-<?php defined('WPINC') or die;
-
-?><!DOCTYPE HTML>
+<?php defined( 'WPINC' ) or die; ?>
+<!DOCTYPE HTML>
 <html>
 <head>
 	<title><?php _e( 'GifDrop', 'gifdrop' ); ?></title>
@@ -13,6 +12,6 @@
 	</div>
 	<div id="modal"></div>
 	<?php include( GifDrop_Plugin::get_instance()->get_path() . 'templates/backbone.php' ); ?>
-	<script>gifdropApp.init()</script>
+	<script>gifdropApp.init();</script>
 </body>
 </html>

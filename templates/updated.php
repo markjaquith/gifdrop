@@ -1,6 +1,4 @@
-<?php
-defined( 'WPINC' ) or die;
-?>
+<?php defined( 'WPINC' ) or die; ?>
 <script>
 (function(){
 	if ( window.history && window.history.pushState ) {
