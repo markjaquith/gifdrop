@@ -1,4 +1,9 @@
 <?php defined( 'WPINC' ) or die; ?>
+<style>
+#gifdrop-path {
+	text-transform: lowercase;
+}
+</style>
 <div class="wrap">
 	<h2><?php echo esc_html( $GLOBALS['title'] ); ?></h2>
 
