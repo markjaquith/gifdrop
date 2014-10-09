@@ -19,7 +19,7 @@ class GifDrop_Plugin {
 		add_filter( 'image_size_names_choose', array( $this, 'image_size_names_choose' ) );
 		add_filter( 'sanitize_file_name', array( $this, 'filename' ), 10, 2 );
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
-
+		add_action( 'root_rewrite_rules', array( $this, 'inject_rewrite_rules' ), 99 );
 	}
 
 	public static function get_instance( $__FILE__ = null ) {
@@ -41,8 +41,56 @@ class GifDrop_Plugin {
 		// Initialize translations
 		load_plugin_textdomain( 'gifdrop', false, basename( dirname( dirname( __FILE__ ) ) ) . '/languages' );
 
+		// Register our CPT
+		$this->register_cpt();
+
 		// Hooks
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+	}
+
+	protected function register_cpt() {
+		$args = array(
+			'supports'            => array( 'title' ),
+			'hierarchical'        => false,
+			'public'              => false,
+			'show_ui'             => false,
+			'show_in_menu'        => false,
+			'show_in_nav_menus'   => false,
+			'show_in_admin_bar'   => false,
+			'can_export'          => true,
+			'has_archive'         => false,
+			'exclude_from_search' => true,
+			'publicly_queryable'  => true,
+			'query_var'           => 'gifdrop',
+			'rewrite'             => false,
+			'capability_type'     => 'page',
+		);
+		register_post_type( 'gifdrop', $args );
+
+		// Create our "container" page on the fly
+		$this->maybe_create_gifdrop();
+	}
+
+	protected function maybe_create_gifdrop() {
+		if ( ! $this->get_option( 'created_page' ) ) {
+			wp_insert_post( array(
+				'post_type' => 'gifdrop',
+				'post_title' => 'gifs',
+				'post_name' => 'gifs',
+				'post_status' => 'publish',
+			));
+			$this->set_option( 'created_page', true );
+			add_action( 'shutdown', 'flush_rewrite_rules' );
+		}
+	}
+
+	public function get_rewrite_path() {
+		return 'gifs';
+	}
+
+	public function inject_rewrite_rules( $rules ) {
+		$rules[trailingslashit($this->get_rewrite_path()) . '?$'] = 'index.php?&gifdrop=gifs';
+		return $rules;
 	}
 
 	public function admin_init() {
@@ -216,8 +264,8 @@ class GifDrop_Plugin {
 	}
 
 	public function template_include( $template ) {
-		if ( is_page() ) {
-			if ( get_post_meta( get_queried_object_id(), '_gifdrop_enabled', true ) ) {
+		if ( is_singular() ) {
+			if ( 'gifdrop' === get_post_type( get_queried_object_id() ) ) {
 				$this->register_frontend_scripts();
 				$this->register_frontend_styles();
 				$images = get_posts( array(
