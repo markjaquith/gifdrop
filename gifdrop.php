@@ -2,7 +2,7 @@
 /*
 Plugin Name: GifDrop
 Plugin URI: http://gifdrop.com/
-Description: Use WordPress to create a repository for all your Gifs and image macros
+Description: Creates a repository page for all your animated gifs.
 Version: 0.1
 Author: Mark Jaquith and Andrew Norcross
 Author URI: http://gifdrop.com/

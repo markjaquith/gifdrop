@@ -3,6 +3,7 @@ defined( 'WPINC' ) or die;
 
 class GifDrop_Version_Check {
 	private static $instance;
+	const MINVERSION = '3.9';
 
 	protected function __construct() {
 		self::$instance = $this;
@@ -17,7 +18,7 @@ class GifDrop_Version_Check {
 	}
 
 	public function passes() {
-		return version_compare( get_bloginfo( 'version' ), '3.8', '>=' );
+		return version_compare( get_bloginfo( 'version' ), self::MINVERSION, '>=' );
 	}
 
 	public function plugins_loaded() {
@@ -35,7 +36,7 @@ class GifDrop_Version_Check {
 	}
 
 	public function admin_notices() {
-		echo '<div class="updated error"><p>' . __('<strong>GifDrop</strong> requires WordPress 3.8 or higher, and has thus been <strong>deactivated</strong>. Please update your install and then try again!', 'gifdrop' ) . '</p></div>';
+		echo '<div class="updated error"><p>' . sprintf( __('<strong>GifDrop</strong> requires WordPress %s or higher, and has thus been <strong>deactivated</strong>. Please update WordPress and then try again!', 'gifdrop' ), self::MINVERSION ) . '</p></div>';
 		if ( isset( $_GET['activate'] ) ) {
 			unset( $_GET['activate'] );
 		}
