@@ -11,7 +11,7 @@
         key = e.which;
         keyString = String.fromCharCode(key);
         allowed = /^[a-zA-Z0-9\/-]$/;
-        if (!(key === 0 || key === 8 || keyString === '' || keyString.match(allowed))) {
+        if (!(key === 0 || key === 13 || key === 8 || keyString === '' || keyString.match(allowed))) {
           return false;
         }
       });
