@@ -269,25 +269,29 @@ class GifDrop_Plugin {
 	}
 
 	public function save() {
-		global $wpdb;
 		current_user_can( 'manage_options' ) || die;
 		check_admin_referer( self::NONCE );
 		$_post = stripslashes_deep( $_POST );
 
 		$old_path = $this->get_option( 'path' );
 		if ( $_post['gifdrop_path'] !== $old_path ) {
-			$new_path = $this->sanitize_path( $_post['gifdrop_path'] );
-			$page_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_type = 'gifdrop'" );
-			wp_update_post( array(
-				'ID' => absint( $page_id ),
-				'post_title' => 'GifDrop: ' . trailingslashit( $new_path ),
-				'post_name' => $this->sanitize_slug( $new_path ),
-			));
-			$this->set_option( 'path', $new_path );
+			$this->update_path( $_post['gifdrop_path'] );
 		}
 
 		wp_redirect( $this->admin_url() . '&updated=true' );
 		exit;
+	}
+
+	public function update_path( $new_path ) {
+		global $wpdb;
+		$new_path = $this->sanitize_path( $new_path );
+		$page_id = $wpdb->get_var( "SELECT ID FROM $wpdb->posts WHERE post_type = 'gifdrop'" );
+		wp_update_post( array(
+			'ID' => absint( $page_id ),
+			'post_title' => 'GifDrop: ' . trailingslashit( $new_path ),
+			'post_name' => $this->sanitize_slug( $new_path ),
+		));
+		$this->set_option( 'path', $new_path );
 	}
 
 	public function register_frontend_scripts() {
