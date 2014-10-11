@@ -104,6 +104,8 @@ class GifDrop_Plugin {
 		$path = strtolower( $path );
 		// Only a-z, 0-9, slash and dash
 		$path = preg_replace( '#[^a-z0-9/-]#', '', $path );
+		// No multiple slashes in a row
+		$path = preg_replace( '#/+#', '/', $path );
 		return $path;
 	}
 
