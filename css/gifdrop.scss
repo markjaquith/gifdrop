@@ -147,16 +147,16 @@ input, button {
 .modal-content-inner {
 	height: 300px;
 	overflow: auto;
+	.copy-to-clipboard {
+		cursor: pointer;
+		margin: 0 auto;
+	}
 	button.copy {
 		display: block;
 		margin: 0 auto;
 		font-size: 14px;
 		padding: 6px;
 		background: #eee;
-		cursor: pointer;
-	}
-	img {
-		cursor: pointer;
 	}
 }
 

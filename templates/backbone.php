@@ -12,7 +12,7 @@
 <script type="text/html" id="tmpl-single">
 	<a href="#" class="dashicons dashicons-dismiss"></a>
 	<div class="modal-content-inner">
-		<div data-clipboard-text="{{data.src}}" class="copy-to-clipboard">
+		<div data-clipboard-text="{{data.src}}" class="copy-to-clipboard" style="width:{{data.width}}px">
 			<p><img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" /></p>
 			<button class="copy" type="button" data-copied-message="<?php esc_attr_e( 'Copied!', 'gifdrop' ); ?>"><?php _e( 'Copy URL', 'gifdrop' ); ?></button>
 		</div>
