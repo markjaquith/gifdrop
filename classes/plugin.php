@@ -31,6 +31,7 @@ class GifDrop_Plugin {
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
 		add_action( 'root_rewrite_rules', array( $this, 'inject_rewrite_rules' ), 99 );
 		add_action( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 20, 2 );
+		add_filter( 'plugin_action_links_' . plugin_basename($this->__FILE__), array( $this, 'plugin_action_links' ) );
 	}
 
 	public function get_url() {
@@ -399,6 +400,11 @@ class GifDrop_Plugin {
 				array( sprintf( __('<a href="%s" target="_blank">Contribute code on GitHub</a>', 'gifdrop' ), 'https://github.com/markjaquith/gifdrop/' ) )
 			);
 		}
+		return $links;
+	}
+
+	public function plugin_action_links( $links ) {
+		$links[] = '<a href="'. admin_url('options-general.php?page=gifdrop') .'">' . __( 'Settings', 'gifdrop' ) . '</a>';
 		return $links;
 	}
 }
