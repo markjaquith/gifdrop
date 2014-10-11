@@ -3,6 +3,7 @@ $ = window.jQuery
 app = window.gifdropApp =
 	init: ->
 		@settings = gifdropSettings
+		@settings.canUpload = '1' is @settings.canUpload # Cast to bool
 		@$wrapper = $ 'body > #outer-wrapper'
 		@$modal = $ 'body > #modal'
 		@images = new @Images _.toArray @settings.attachments
@@ -211,6 +212,13 @@ class app.ImageNavView extends app.View
 	ready: ->
 		@$search.focus()
 
+class app.ImagesListEmptyView extends app.View
+	className: 'gifs-empty',
+	template: wp.template 'empty'
+
+	initialize: ->
+		@listenTo @collection, 'add', @remove
+
 class app.ImagesListView extends app.View
 	className: 'gifs'
 	masonryEnabled: no
@@ -250,7 +258,10 @@ class app.ImagesListView extends app.View
 
 	setSubviews: ->
 		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
-		@views.set gifViews
+		if gifViews.length
+			@views.set gifViews
+		else if app.settings.canUpload
+			@views.add new app.ImagesListEmptyView collection: @collection
 
 	ready: -> $ => @masonry()
 

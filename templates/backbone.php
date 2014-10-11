@@ -9,6 +9,10 @@
 <input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
 </script>
 
+<script type="text/html" id="tmpl-empty">
+<p>Drag gifs here to add them to your collection</p>
+</script>
+
 <script type="text/html" id="tmpl-single">
 	<a href="#" class="dashicons dashicons-dismiss"></a>
 	<div class="modal-content-inner">

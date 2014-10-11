@@ -325,6 +325,8 @@ class GifDrop_Plugin {
 					'id' => (int) get_queried_object_id(),
 					'nonce' => wp_create_nonce( 'gifdrop_' . get_queried_object_id() ),
 					'attachments' => $images,
+					// 'attachments' => array(), // to test no-gifs situation
+					'canUpload' => current_user_can( 'edit_post', (int) get_queried_object_id() ) ? '1' : '0', // 1/0 strings for REASONS
 				));
 				wp_plupload_default_settings();
 				return $this->get_path() . '/templates/page.php';
