@@ -339,7 +339,7 @@ class GifDrop_Plugin {
 		return $template;
 	}
 
-	protected function increment_id() {
+	public function increment_id() {
 		// set our option first with non autoloading
 		add_option( 'gifdrop_filename_count', 1, '', 'no' );
 		// now get our option
