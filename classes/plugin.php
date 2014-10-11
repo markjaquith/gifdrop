@@ -7,7 +7,7 @@ class GifDrop_Plugin {
 	const OPTION = 'gifdrop';
 	const NONCE = 'gifdrop_save';
 
-	protected function __construct( $__FILE__ ) {
+	public function __construct( $__FILE__ ) {
 		$this->__FILE__ = $__FILE__;
 		$this->base = dirname( dirname( __FILE__ ) );
 		add_action( 'plugins_loaded', array( $this, 'add_hooks' ) );
@@ -51,7 +51,7 @@ class GifDrop_Plugin {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
-	protected function register_cpt() {
+	public function register_cpt() {
 		$args = array(
 			'supports'            => array( 'title' ),
 			'hierarchical'        => false,
@@ -74,7 +74,7 @@ class GifDrop_Plugin {
 		$this->maybe_create_gifdrop();
 	}
 
-	protected function maybe_create_gifdrop() {
+	public function maybe_create_gifdrop() {
 		if ( ! $this->get_option( 'created_page' ) ) {
 			$path = 'gifs';
 			$this->set_option( 'path', $path );
@@ -89,7 +89,7 @@ class GifDrop_Plugin {
 		}
 	}
 
-	protected function unsandwich_slashes( $string ) {
+	public function unsandwich_slashes( $string ) {
 		// Remove leading slashes
 		$string = preg_replace( '#^/+#', '', $string );
 		// And trailing slashes
@@ -97,7 +97,7 @@ class GifDrop_Plugin {
 		return $string;
 	}
 
-	protected function sanitize_path( $path ) {
+	public function sanitize_path( $path ) {
 		// Remove leading/trailing slashes
 		$path = $this->unsandwich_slashes( $path );
 		// Lowercase
@@ -107,7 +107,7 @@ class GifDrop_Plugin {
 		return $path;
 	}
 
-	protected function sanitize_slug( $path ) {
+	public function sanitize_slug( $path ) {
 		// Do the path sanitization first (removes leading/trailing slashes and more)
 		$path = $this->sanitize_path( $path );
 		// Make other slashes into a dash so experts/exchange doesn't become expertsexchange
@@ -121,7 +121,7 @@ class GifDrop_Plugin {
 		return $path;
 	}
 
-	protected function path_regex() {
+	public function path_regex() {
 		$path = $this->get_option( 'path' );
 		$path = trailingslashit( $this->sanitize_path( $path ) );
 		if ( '/' === $path ) {
@@ -132,7 +132,7 @@ class GifDrop_Plugin {
 		return $path;
 	}
 
-	protected function path_slug() {
+	public function path_slug() {
 		return $this->sanitize_slug( $this->get_option( 'path' ) );
 	}
 
@@ -288,18 +288,18 @@ class GifDrop_Plugin {
 		exit;
 	}
 
-	protected function register_frontend_scripts() {
+	public function register_frontend_scripts() {
 		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'bower_components/isotope/dist/isotope.pkgd.min.js', array('jquery'), '2.0.1' );
 		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'bower_components/jquery.lazyload/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
 		wp_register_script( 'gifdrop-zeroclipboard', $this->get_url() . 'bower_components/zeroclipboard/dist/ZeroClipboard.min.js', array(), '2.1.6' );
 		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), '0.1b' );
 	}
 
-	protected function register_frontend_styles() {
+	public function register_frontend_styles() {
 		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array( 'dashicons' ), '0.1b' );
 	}
 
-	protected function only_some_attachment_fields( &$attachment ) {
+	public function only_some_attachment_fields( &$attachment ) {
 		$full = wp_get_attachment_image_src( $attachment->ID, 'full' );
 		$static = wp_get_attachment_image_src( $attachment->ID, 'full-gif-static' );
 		$attachment = (object) array(
@@ -350,7 +350,7 @@ class GifDrop_Plugin {
 		return base_convert( $current, 10, 36 );
 	}
 
-	protected function is_gifdrop_page( $post_id = 0 ) {
+	public function is_gifdrop_page( $post_id = 0 ) {
 		return 'gifdrop' === get_post_type( $post_id );
 	}
 
