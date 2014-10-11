@@ -148,6 +148,8 @@ input, button {
 	height: 300px;
 	overflow: auto;
 	button.copy {
+		display: block;
+		margin: 0 auto;
 		font-size: 14px;
 		padding: 6px;
 		background: #eee;

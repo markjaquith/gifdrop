@@ -366,6 +366,9 @@ class app.SingleView extends app.View
 
 	initialize: ->
 		@listenTo @, 'modalClosing:click', @save
+		@copyButton = null
+		@buttonClipboard = null
+		@imgClipboard = null
 
 	save: ->
 		@model.set title: @$title.val()
@@ -389,12 +392,14 @@ class app.SingleView extends app.View
 	postRender: ->
 		@$title = @$ 'input.title'
 		@$contentInner = @$ '.modal-content-inner'
-		@imgClipboard = new ZeroClipboard @$contentInner.find( 'img' ).get(0)
-		@imgClipboard.on 'aftercopy', @alertCopied
+		@$clipboardWrap = @$contentInner.find '.copy-to-clipboard'
 		@$copyButton = @$contentInner.find 'button.copy'
+
 		@$copyButton.css width: @model.get 'width'
-		@buttonClipboard = new ZeroClipboard @$copyButton.get(0)
-		@buttonClipboard.on 'aftercopy', @alertCopied
+
+		@clipboard = new ZeroClipboard @$clipboardWrap.get(0)
+		@clipboard.on 'aftercopy', @alertCopied
+
 		@resize()
 
 	ready: ->
