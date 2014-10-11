@@ -26,3 +26,5 @@
 		</p>
 	</div>
 </script>
+
+<?php do_action( 'gifdrop_backbone_templates' ); ?>

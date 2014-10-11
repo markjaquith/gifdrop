@@ -13,5 +13,6 @@
 	<div id="modal"></div>
 	<?php include( GifDrop_Plugin::get_instance()->get_path() . 'templates/backbone.php' ); ?>
 	<script>gifdropApp.init();</script>
+	<?php do_action( 'gifdrop_post_init' ); ?>
 </body>
 </html>
