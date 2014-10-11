@@ -10,7 +10,7 @@
 </script>
 
 <script type="text/html" id="tmpl-empty">
-<p>Drag gifs here to add them to your collection</p>
+<p><?php _e( 'Drag gifs here to add them to your collection', 'gifdrop' ); ?></p>
 </script>
 
 <script type="text/html" id="tmpl-single">
