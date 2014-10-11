@@ -30,6 +30,7 @@ class GifDrop_Plugin {
 		add_filter( 'sanitize_file_name', array( $this, 'filename' ), 10, 2 );
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
 		add_action( 'root_rewrite_rules', array( $this, 'inject_rewrite_rules' ), 99 );
+		add_action( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 20, 2 );
 	}
 
 	public function get_url() {
@@ -382,5 +383,22 @@ class GifDrop_Plugin {
 			$sizes['full-gif-static'] = __( 'Full Size (non-animated)', 'gifdrop' );
 		}
 		return $sizes;
+	}
+
+	/**
+	 * Adds a GitHub link to the plugin meta
+	 *
+	 * @param array $links the current array of links
+	 * @param string $file the current plugin being processed
+	 * @return array the modified array of links
+	 */
+	public function plugin_row_meta( $links, $file ) {
+		if ( $file === plugin_basename( $this->__FILE__ ) ) {
+			return array_merge(
+				$links,
+				array( sprintf( __('<a href="%s" target="_blank">Contribute code on GitHub</a>', 'gifdrop' ), 'https://github.com/markjaquith/gifdrop/' ) )
+			);
+		}
+		return $links;
 	}
 }
