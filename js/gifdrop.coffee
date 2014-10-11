@@ -42,7 +42,7 @@ app = window.gifdropApp =
 			alert 'error'
 
 		uploadSuccess = (attachment) ->
-			console.log attachment
+			# console.log attachment
 			attr = attachment.attributes
 			full = attr.sizes.full
 			unanimated = attr.sizes['full-gif-static'] or full
@@ -372,7 +372,7 @@ class app.SingleView extends app.View
 
 	save: ->
 		@model.set title: @$title.val()
-		console.log 'Saving', @$title.val()
+		# console.log 'Saving', @$title.val()
 		@model.save()
 
 	keyup: (e) ->
