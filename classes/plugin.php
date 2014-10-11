@@ -10,6 +10,17 @@ class GifDrop_Plugin {
 	protected function __construct( $__FILE__ ) {
 		$this->__FILE__ = $__FILE__;
 		$this->base = dirname( dirname( __FILE__ ) );
+		add_action( 'plugins_loaded', array( $this, 'add_hooks' ) );
+	}
+
+	public static function get_instance( $__FILE__ = null ) {
+		if ( ! isset( self::$instance ) ) {
+			self::$instance = new self( $__FILE__ );
+		}
+		return self::$instance;
+	}
+
+	public function add_hooks() {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_init', array( $this, 'change_upload_dir' ), 999 );
@@ -19,13 +30,6 @@ class GifDrop_Plugin {
 		add_filter( 'sanitize_file_name', array( $this, 'filename' ), 10, 2 );
 		add_action( 'wp_ajax_gifdrop', array( $this, 'ajax' ) );
 		add_action( 'root_rewrite_rules', array( $this, 'inject_rewrite_rules' ), 99 );
-	}
-
-	public static function get_instance( $__FILE__ = null ) {
-		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self( $__FILE__ );
-		}
-		return self::$instance;
 	}
 
 	public function get_url() {
