@@ -1,4 +1,27 @@
 .sass-cache
 .codekit-cache
 .DS_Store
-/vendor/zeroclipboard/zeroclipboard/test/
+
+#
+# Git ignores are weird, so bear with me for the rest of this:
+#
+
+# Bower components, by default
+/bower_components/*
+
+# But not zeroclipboard
+!/bower_components/zeroclipboard/
+# But yes to its subfolders
+/bower_components/zeroclipboard/*
+# Except this one
+!/bower_components/zeroclipboard/dist/
+
+# But not Isotope
+!/bower_components/isotope/
+# But yes to its subfolders
+!/bower_components/isotope/*
+# Except this one
+!/bower_components/isotope/dist/
+
+# But not jquery.lazyload
+!/bower_components/jquery.lazyload/

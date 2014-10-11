@@ -289,9 +289,9 @@ class GifDrop_Plugin {
 	}
 
 	protected function register_frontend_scripts() {
-		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'js/isotope.min.js', array('jquery'), '2.0.0' );
-		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'js/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
-		wp_register_script( 'gifdrop-zeroclipboard', $this->get_url() . 'vendor/zeroclipboard/zeroclipboard/dist/ZeroClipboard.min.js', array(), '2.1.6' );
+		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'bower_components/isotope/dist/isotope.pkgd.min.js', array('jquery'), '2.0.1' );
+		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'bower_components/jquery.lazyload/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
+		wp_register_script( 'gifdrop-zeroclipboard', $this->get_url() . 'bower_components/zeroclipboard/dist/ZeroClipboard.min.js', array(), '2.1.6' );
 		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), '0.1b' );
 	}
 
