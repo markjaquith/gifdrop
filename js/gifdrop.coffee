@@ -8,6 +8,7 @@ app = window.gifdropApp =
 		@$modal = $ 'body > #modal'
 		@deviceWidth = if window.innerWidth > 0 then window.innerWidth else screen.width
 		@imageWidth = if @deviceWidth >= 640 then 320 else Math.floor( @deviceWidth / 2 )
+		@smallMobile = @imageWidth < 320
 		$("head").append "<style>.gif { width: #{@imageWidth}px; }</style>"
 		@images = new @Images _.toArray @settings.attachments
 
@@ -306,10 +307,13 @@ class app.ImageListView extends app.View
 		@restoreCrop()
 
 	click: ->
-		view = new app.SingleView model: @model
-		app.modalView.open()
-		app.modalView.views.set view
-		@mouseout()
+		if app.smallMobile
+			window.location.href = @model.get 'src'
+		else
+			view = new app.SingleView model: @model
+			app.modalView.open()
+			app.modalView.views.set view
+			@mouseout()
 
 	unCrop: ->
 		if @model.get('imgHeight') isnt @model.get('divHeight')
