@@ -6,6 +6,9 @@ app = window.gifdropApp =
 		@settings.canUpload = '1' is @settings.canUpload # Cast to bool
 		@$wrapper = $ 'body > #outer-wrapper'
 		@$modal = $ 'body > #modal'
+		@deviceWidth = if window.innerWidth > 0 then window.innerWidth else screen.width
+		@imageWidth = if @deviceWidth >= 640 then 320 else Math.floor( @deviceWidth / 2 )
+		$("head").append "<style>.gif { width: #{@imageWidth}px; }</style>"
 		@images = new @Images _.toArray @settings.attachments
 
 		# Modal view
@@ -111,7 +114,7 @@ class app.BrowserView extends wp.Backbone.View
 
 class app.Image extends Backbone.Model
 	initialize: ->
-		[width, height] = app.fitTo @get('width'), @get('height'), 320
+		[width, height] = app.fitTo @get('width'), @get('height'), app.imageWidth
 		@set
 			imgWidth: width
 			divHeight: app.restrictHeight width, height
@@ -277,7 +280,7 @@ class app.ImagesListView extends app.View
 				opacity: 0
 			sortBy: 'original-order' # This is a "magic" value that respects the DOM
 			masonry:
-				columnWidth: 320
+				columnWidth: app.imageWidth
 				gutter: 0
 
 class app.ImageListView extends app.View

@@ -50,7 +50,6 @@ input, button {
 }
 
 .gif {
-	width: 320px;
 	float: left;
 	overflow: hidden;
 	@include transition(padding 200ms ease, z-index 200ms ease);
@@ -80,6 +79,9 @@ input, button {
 		color: #eeeeee;
 		background: #222222;
 		letter-spacing: 0.01em;
+		@media screen and (max-width: 640px) {
+			width: 35%;
+		}
 	}
 	input {
 		float: left;
@@ -89,6 +91,9 @@ input, button {
 		font-size: 18px;
 		padding: 3px;
 		border: none;
+		@media screen and (max-width: 640px) {
+			width: 60%;
+		}
 	}
 }
 

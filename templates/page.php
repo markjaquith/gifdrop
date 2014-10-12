@@ -3,6 +3,7 @@
 <html>
 <head>
 	<title><?php GifDrop_Plugin::get_site_name( true ); ?></title>
+	<meta name="viewport" content="width=640, initial-scale=0.5">
 	<?php wp_print_scripts( array( 'gifdrop' ) ); ?>
 	<?php wp_print_styles( array( 'gifdrop' ) ); ?>
 </head>
