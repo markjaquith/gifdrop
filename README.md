@@ -1,4 +1,7 @@
 # GifDrop #
+
+[![Build Status](https://travis-ci.org/markjaquith/gifdrop.png?branch=master)](https://travis-ci.org/markjaquith/gifdrop)  
+
 Contributors: markjaquith, norcross  
 Requires at least: 4.0  
 License: GPLv2 or later  
