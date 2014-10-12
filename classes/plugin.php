@@ -387,6 +387,25 @@ class GifDrop_Plugin {
 	}
 
 	/**
+	 * fetches the site name (used in numerous places)
+	 * with a fallback to GifDrop
+	 *
+	 * @param bool $echo whether or not to echo the name
+	 *
+	 * @return string the name
+	 */
+	public function get_site_name( $echo = false ) {
+		// fetch the name
+		$name = self::get_option( 'name', __( 'GifDrop', 'gifdrop' ) );
+		// echo if requested
+		if ( ! empty( $echo ) ) {
+			echo $name;
+		}
+		// just return it
+		return $name;
+	}
+
+	/**
 	 * Returns the URL for the GifDrop settings page
 	 *
 	 * @return string the settings page URL
@@ -405,6 +424,11 @@ class GifDrop_Plugin {
 		check_admin_referer( self::NONCE );
 		$_post = stripslashes_deep( $_POST );
 
+		// handle name setting
+		$name = ! empty( $_post['gifdrop_name'] ) ? sanitize_text_field( $_post['gifdrop_name'] ) : '';
+		$this->set_option( 'name', $name );
+
+		// handle path setting
 		$old_path = $this->get_option( 'path' );
 		if ( $_post['gifdrop_path'] !== $old_path ) {
 			$this->update_path( $_post['gifdrop_path'] );

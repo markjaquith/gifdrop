@@ -2,7 +2,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title><?php _e( 'GifDrop', 'gifdrop' ); ?></title>
+	<title><?php GifDrop_Plugin::get_site_name( true ); ?></title>
 	<?php wp_print_scripts( array( 'gifdrop' ) ); ?>
 	<?php wp_print_styles( array( 'gifdrop' ) ); ?>
 </head>

@@ -5,7 +5,7 @@
 </script>
 
 <script type="text/html" id="tmpl-nav">
-<h1><?php _e( 'GifDrop', 'gifdrop' ); ?></h1>
+<h1><?php GifDrop_Plugin::get_site_name( true ); ?></h1>
 <input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
 </script>
 
