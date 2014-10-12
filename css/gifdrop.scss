@@ -156,12 +156,16 @@ input, button {
 		cursor: pointer;
 		margin: 0 auto;
 	}
-	button.copy {
+	button.copy, input.copy {
 		display: block;
 		margin: 0 auto;
 		font-size: 14px;
 		padding: 6px;
 		background: #eee;
+		width: 100%;
+	}
+	input.copy {
+		display: none;
 	}
 }
 

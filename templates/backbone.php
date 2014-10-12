@@ -19,9 +19,10 @@
 		<div data-clipboard-text="{{data.src}}" class="copy-to-clipboard" style="width:{{data.width}}px">
 			<p><img src="{{data.src}}" width="{{data.width}}" height="{{data.height}}" /></p>
 			<button type="button" class="copy" data-copied-message="<?php esc_attr_e( 'Copied!', 'gifdrop' ); ?>"><?php _e( 'Copy URL', 'gifdrop' ); ?></button>
+			<input type="text" class="copy" readonly value="{{data.src}}" />
 		</div>
 		<p class="details">
-			<i class="dashicons dashicons-tag"></i><input class="title" type="text" value="{{data.title}}" />
+			<i class="dashicons dashicons-tag"></i><input <# if ( ! data.canUpload ) { #>readonly<# } #> class="title" type="text" value="{{data.title}}" />
 			<span class="label"><?php _e( 'Keywords', 'gifdrop' ); ?></span>
 		</p>
 	</div>

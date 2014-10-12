@@ -376,13 +376,20 @@ class app.SingleView extends app.View
 	template: wp.template 'single'
 	className: 'modal-content'
 	events:
-		'keyup input': 'keyup'
+		'keyup input.title': 'keyup'
+		'click input.copy': 'selectURL'
+		'click img': 'selectURL'
 
 	initialize: ->
 		@listenTo @, 'modalClosing:click', @save
 		@copyButton = null
 		@buttonClipboard = null
 		@imgClipboard = null
+
+	prepare: ->
+		data = super
+		data.canUpload = app.settings.canUpload
+		data
 
 	save: ->
 		@model.set title: @$title.val()
@@ -403,19 +410,32 @@ class app.SingleView extends app.View
 	alertCopied: =>
 		@$copyButton.html @$copyButton.data 'copied-message'
 
+	selectURL: ->
+		if @$copyInput.is ':visible'
+			@$copyInput.prop('readonly', no).select().prop('readonly', yes)
+
+	clipboardFallback: =>
+		@$copyButton.hide()
+		@$copyInput.show()
+
 	postRender: ->
 		@$title = @$ 'input.title'
 		@$contentInner = @$ '.modal-content-inner'
 		@$clipboardWrap = @$contentInner.find '.copy-to-clipboard'
 		@$copyButton = @$contentInner.find 'button.copy'
+		@$copyInput = @$contentInner.find 'input.copy'
 
 		@$copyButton.css width: @model.get 'width'
 
 		@clipboard = new ZeroClipboard @$clipboardWrap.get(0)
 		@clipboard.on 'aftercopy', @alertCopied
+		@clipboard.on 'error', @clipboardFallback
 
 		@resize()
 
 	ready: ->
-		@$title.focus().val(@$title.val())
+		if app.settings.canUpload
+			@$title.focus().val(@$title.val())
+		else if @$copyInput.is ':visible'
+			@selectURL()
 		$(window).on 'resize', _.throttle( @resize, 50 )

@@ -6,6 +6,7 @@ class GifDrop_Plugin {
 	private $base;
 	const OPTION = 'gifdrop';
 	const NONCE = 'gifdrop_save';
+	const JS_CSS_VERSION = '2014-10-12b';
 
 	/**
 	 * Constructs the object, hooks in to 'plugins_loaded'
@@ -462,14 +463,14 @@ class GifDrop_Plugin {
 		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'bower_components/isotope/dist/isotope.pkgd.min.js', array('jquery'), '2.0.1' );
 		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'bower_components/jquery.lazyload/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
 		wp_register_script( 'gifdrop-zeroclipboard', $this->get_url() . 'bower_components/zeroclipboard/dist/ZeroClipboard.min.js', array(), '2.1.6' );
-		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), '0.9-beta-1' );
+		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), self::JS_CSS_VERSION );
 	}
 
 	/**
 	 * Registers styles for the frontend (GifDrop repository page)
 	 */
 	public function register_frontend_styles() {
-		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array( 'dashicons' ), '0.9-beta-1' );
+		wp_register_style( 'gifdrop', $this->get_url() . 'css/gifdrop.css', array( 'dashicons' ), self::JS_CSS_VERSION );
 	}
 
 	/**
