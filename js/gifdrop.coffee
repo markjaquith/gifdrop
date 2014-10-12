@@ -207,7 +207,7 @@ class app.ImageNavView extends app.View
 	search: (e) ->
 		if e.which is 27
 			@$search.val ''
-		@debouncedSearch ?= _.debounce @_search, 250
+		@debouncedSearch ?= _.debounce @_search, 500
 		@debouncedSearch @$search.val()
 
 	postRender: ->
