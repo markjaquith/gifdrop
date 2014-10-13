@@ -204,3 +204,61 @@ input, button {
 	font-size: 26px;
 	color: #ddd;
 }
+
+#upload-overlay {
+    opacity: 0;
+    visibility: hidden;
+ 	position: fixed;
+ 	top: 0;
+ 	left: 0;
+ 	background: rgba(0,0,0,0.6);
+ 	z-index: 5;
+ 	width: 100%;
+ 	height: 100%;
+ 	@include transition(opacity 0.5s, visibility 0s 0.5s);
+
+ 	.dashicons-update {
+		z-index: 500;
+		font-size: 120px;
+		height: 120px;
+		width: 120px;
+		color: #ffffff;
+		display: block;
+		margin: 0 auto;
+		position:relative;
+		top: calc(50% - 120px);
+		-webkit-animation: spin 6s linear 0s infinite normal;
+		-moz-animation: spin 6s linear 0s infinite normal;
+		-ms-animation: spin 6s linear 0s infinite normal;
+		-o-animation: spin 6s linear 0s infinite normal;
+		animation: spin 6s linear 0s infinite normal;
+ 	}
+}
+
+body.uploading {
+	#upload-overlay {
+		visibility: visible;
+		opacity: 0.6;
+	}
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  0% {-webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@-ms-keyframes spin {
+  0% {-ms-transform: rotate(0deg); }
+  100% { -ms-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+  0% { -moz-transform: rotate(0deg); }
+  100% { -moz-transform: rotate(360deg); }
+}
+@-o-keyframes spin {
+  0% { -o-transform: rotate(0deg); }
+  100% { -o-transform: rotate(360deg); }
+}

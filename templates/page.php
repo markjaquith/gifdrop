@@ -12,6 +12,7 @@
 		<noscript><?php _e( 'JavaScript needs to be enabled.' ); ?></noscript>
 	</div>
 	<div id="modal"></div>
+	<div id="upload-overlay"><i class="dashicons dashicons-update"></i></div>
 	<?php include( GifDrop_Plugin::get_instance()->get_path() . 'templates/backbone.php' ); ?>
 	<script>gifdropApp.init();</script>
 	<?php do_action( 'gifdrop_post_init' ); ?>
