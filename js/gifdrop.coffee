@@ -47,12 +47,14 @@ app = window.gifdropApp =
 
 		uploadStart = (uploader) ->
 			# console.log 'uploadStart', uploader
+			$('body').addClass 'uploading'
 
 		uploadError = ->
 			alert 'error'
 
 		uploadSuccess = (attachment) ->
 			# console.log attachment
+			$('body').removeClass 'uploading'
 			attr = attachment.attributes
 			full = attr.sizes.full
 			unanimated = attr.sizes['full-gif-static'] or full

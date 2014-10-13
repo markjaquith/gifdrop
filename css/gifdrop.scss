@@ -155,6 +155,7 @@ input, button {
 	.copy-to-clipboard {
 		cursor: pointer;
 		margin: 0 auto;
+		outline: 0 none;
 	}
 	button.copy, input.copy {
 		display: block;
