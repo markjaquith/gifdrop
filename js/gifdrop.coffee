@@ -10,7 +10,7 @@ app = window.gifdropApp =
 		@smallMobile = windowWidth < 640
 		columns = if @smallMobile then 2 else Math.ceil( windowWidth / 320 )
 		@imageWidth = Math.floor( windowWidth / columns )
-		$("head").append "<style>.gif { width: #{@imageWidth}px; }</style>"
+		@setGifWidthCSS()
 		@images = new @Images _.toArray @settings.attachments
 
 		# Modal view
@@ -34,6 +34,10 @@ app = window.gifdropApp =
 			$('input.search').focus()
 
 		@initUploads()
+
+	setGifWidthCSS: ->
+		$("#gifdrop-gif-size").remove()
+		$("head").append "<style id='gifdrop-gif-size'>.gif { width: #{@imageWidth}px; }</style>"
 
 	initUploads: ->
 		uploadProgress = (uploader, file) ->
