@@ -6,9 +6,10 @@ app = window.gifdropApp =
 		@settings.canUpload = '1' is @settings.canUpload # Cast to bool
 		@$wrapper = $ 'body > #outer-wrapper'
 		@$modal = $ 'body > #modal'
-		@deviceWidth = if window.innerWidth > 0 then window.innerWidth else screen.width
-		@imageWidth = if @deviceWidth >= 640 then 320 else Math.floor( @deviceWidth / 2 )
-		@smallMobile = @imageWidth < 320
+		windowWidth = $(window).width()
+		@smallMobile = windowWidth < 640
+		columns = if @smallMobile then 2 else Math.ceil( windowWidth / 320 )
+		@imageWidth = Math.floor( windowWidth / columns )
 		$("head").append "<style>.gif { width: #{@imageWidth}px; }</style>"
 		@images = new @Images _.toArray @settings.attachments
 
