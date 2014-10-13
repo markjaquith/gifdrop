@@ -215,7 +215,7 @@ input, button {
  	z-index: 5;
  	width: 100%;
  	height: 100%;
- 	@include transition(opacity 0.5s, visibility 0s 0.5s);
+ 	@include transition(opacity 400ms, visibility 0s 400ms);
 
  	.dashicons-update {
 		z-index: 500;
@@ -225,7 +225,7 @@ input, button {
 		color: #ffffff;
 		display: block;
 		margin: 0 auto;
-		position:relative;
+		position: relative;
 		top: calc(50% - 120px);
 		-webkit-animation: spin 6s linear 0s infinite normal;
 		-moz-animation: spin 6s linear 0s infinite normal;
