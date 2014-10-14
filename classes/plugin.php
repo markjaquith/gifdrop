@@ -388,22 +388,12 @@ class GifDrop_Plugin {
 	}
 
 	/**
-	 * fetches the site name (used in numerous places)
-	 * with a fallback to GifDrop
-	 *
-	 * @param bool $echo whether or not to echo the name
+	 * Fetches the site name with a fallback to "GifDrop"
 	 *
 	 * @return string the name
 	 */
-	public function get_site_name( $echo = false ) {
-		// fetch the name
-		$name = $this->get_option( 'name', __( 'GifDrop', 'gifdrop' ) );
-		// echo if requested
-		if ( ! empty( $echo ) ) {
-			echo $name;
-		}
-		// just return it
-		return $name;
+	public function get_site_name() {
+		return $this->get_option( 'name', __( 'GifDrop', 'gifdrop' ) );
 	}
 
 	/**
