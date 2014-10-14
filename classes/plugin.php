@@ -397,7 +397,7 @@ class GifDrop_Plugin {
 	 */
 	public function get_site_name( $echo = false ) {
 		// fetch the name
-		$name = self::get_option( 'name', __( 'GifDrop', 'gifdrop' ) );
+		$name = $this->get_option( 'name', __( 'GifDrop', 'gifdrop' ) );
 		// echo if requested
 		if ( ! empty( $echo ) ) {
 			echo $name;
