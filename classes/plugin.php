@@ -6,7 +6,7 @@ class GifDrop_Plugin {
 	private $base;
 	const OPTION = 'gifdrop';
 	const NONCE = 'gifdrop_save';
-	const JS_CSS_VERSION = '2014-10-13a';
+	const JS_CSS_VERSION = '2014-10-14';
 
 	/**
 	 * Constructs the object, hooks in to 'plugins_loaded'

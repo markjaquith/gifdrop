@@ -2,14 +2,11 @@ $ = window.jQuery
 
 app = window.gifdropApp =
 	init: ->
+		@$window = $ window
 		@settings = gifdropSettings
 		@settings.canUpload = '1' is @settings.canUpload # Cast to bool
 		@$wrapper = $ 'body > #outer-wrapper'
 		@$modal = $ 'body > #modal'
-		windowWidth = $(window).width()
-		@smallMobile = windowWidth < 640
-		columns = if @smallMobile then 2 else Math.ceil( windowWidth / 320 )
-		@imageWidth = Math.floor( windowWidth / columns )
 		@setGifWidthCSS()
 		@images = new @Images _.toArray @settings.attachments
 
@@ -36,8 +33,11 @@ app = window.gifdropApp =
 		@initUploads()
 
 	setGifWidthCSS: ->
-		$("#gifdrop-gif-size").remove()
-		$("head").append "<style id='gifdrop-gif-size'>.gif { width: #{@imageWidth}px; }</style>"
+		windowWidth = @$window.width()
+		@smallMobile = windowWidth < 640
+		columns = if @smallMobile then 2 else Math.ceil( windowWidth / 320 )
+		@imageWidth = Math.floor( windowWidth / columns )
+		$("head").append "<style>.gif { width: #{@imageWidth}px; }</style>"
 
 	initUploads: ->
 		uploadProgress = (uploader, file) ->
@@ -122,6 +122,9 @@ class app.BrowserView extends wp.Backbone.View
 
 class app.Image extends Backbone.Model
 	initialize: ->
+		@setImageDims()
+
+	setImageDims: =>
 		[width, height] = app.fitTo @get('width'), @get('height'), app.imageWidth
 		@set
 			imgWidth: width
@@ -232,7 +235,6 @@ class app.ImagesListEmptyView extends app.View
 
 class app.ImagesListView extends app.View
 	className: 'gifs'
-	masonryEnabled: no
 
 	initialize: ->
 		@setSubviews()
@@ -243,7 +245,7 @@ class app.ImagesListView extends app.View
 	animateItemIn: (model, $item) ->
 		position = @collection.filtered.indexOf model
 		max = @collection.filtered.length - 1
-		if @masonryEnabled
+		if @$el.data 'isotope'
 			switch position
 				when 0 then @$el.isotope 'prepended', $item
 				when max then @$el.isotope 'appended', $item
@@ -274,10 +276,23 @@ class app.ImagesListView extends app.View
 		else if app.settings.canUpload
 			@views.add new app.ImagesListEmptyView collection: @collection
 
-	ready: -> $ => @masonry()
+	resize: ->
+		@pauseMasonry()
+		app.setGifWidthCSS()
+		@trigger 'resize'
+		@masonry()
+
+	ready: ->
+		$ => @masonry()
+		$(window).on 'resize', @pauseMasonry
+		$(window).on 'resize', _.debounce( _.bind( @resize, @ ), 500 )
+
+	pauseMasonry: =>
+		@$el.hide() # We show it in masonry()
+		@$el.isotope 'destroy' if @$el.data 'isotope'
 
 	masonry: =>
-		@masonryEnabled = yes
+		@$el.show() # if it was hidden
 		@$el.isotope
 			layoutMode: 'masonry'
 			itemSelector: '.gif'
@@ -290,6 +305,7 @@ class app.ImagesListView extends app.View
 			masonry:
 				columnWidth: app.imageWidth
 				gutter: 0
+		$('html').scroll() # Fake scroll triggers images to lazy load if visible
 
 class app.ImageListView extends app.View
 	className: 'gif'
@@ -301,6 +317,7 @@ class app.ImageListView extends app.View
 
 	initialize: ->
 		@listenTo @, 'loadImage', @loadImage
+		@listenTo @model, 'change:divHeight', @crop
 
 	attributes: ->
 		id: "gif-#{@model.get 'id'}"
@@ -347,6 +364,7 @@ class app.ImageListView extends app.View
 		@$img = @$ '> img'
 
 	ready: ->
+		@listenTo @views.parent, 'resize', @model.setImageDims
 		@$img.show().lazyload()
 		@views.parent.trigger 'newView', @model, @$el
 
