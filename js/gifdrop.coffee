@@ -235,8 +235,10 @@ class app.ImagesListEmptyView extends app.View
 
 class app.ImagesListView extends app.View
 	className: 'gifs'
+	windowWidth: 0
 
 	initialize: ->
+		@windowWidth = $(window).width()
 		@setSubviews()
 		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
@@ -277,10 +279,12 @@ class app.ImagesListView extends app.View
 			@views.add new app.ImagesListEmptyView collection: @collection
 
 	resize: ->
-		@pauseMasonry()
-		app.setGifWidthCSS()
-		@trigger 'resize'
-		@masonry()
+		if @windowWidth isnt $(window).width()
+			@pauseMasonry()
+			app.setGifWidthCSS()
+			@trigger 'resize'
+			@masonry()
+			@windowWidth = $(window).width()
 
 	ready: ->
 		$ => @masonry()
@@ -288,8 +292,10 @@ class app.ImagesListView extends app.View
 		$(window).on 'resize', _.debounce( _.bind( @resize, @ ), 500 )
 
 	pauseMasonry: =>
-		@$el.hide() # We show it in masonry()
-		@$el.isotope 'destroy' if @$el.data 'isotope'
+		if @windowWidth isnt $(window).width()
+			@windowWidth = 0
+			@$el.hide() # We show it in masonry()
+			@$el.isotope 'destroy' if @$el.data 'isotope'
 
 	masonry: =>
 		@$el.show() # if it was hidden
