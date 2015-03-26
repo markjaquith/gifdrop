@@ -1,0 +1,32 @@
+{
+  "name": "gifdrop",
+  "title": "GifDrop",
+  "description": "Creates a repository page for all your animated gifs.",
+  "version": "0.9.0-beta-2",
+  "homepage": "http://gifdrop.com/",
+  "author": {
+    "name": "Mark Jaquith and Andrew Norcross",
+    "email": "mark@jaquith.me",
+    "url": "http://gifdrop.com/"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-coffee": "~0.13.0",
+    "grunt-coffeelint": "~0.0.13",
+    "grunt-contrib-uglify": "~0.6.0",
+    "grunt-contrib-compass": "~1.0.1",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-nodeunit": "~0.4.1",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-copy": "~0.7.0",
+    "grunt-contrib-compress": "~0.12.0",
+    "grunt-phpunit": "~0.3.6",
+    "grunt-text-replace": "~0.4.0",
+    "grunt-svn-checkout": "~0.1.1",
+    "grunt-push-svn": "~0.2.1",
+    "coffeelint": "^1"
+  },
+  "keywords": []
+}

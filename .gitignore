@@ -1,6 +1,11 @@
-.sass-cache
-.codekit-cache
 .DS_Store
+.sass-cache
+/node_modules
+/release
+/js/*.js
+/js/*.map
+!/js/*.min.js
+!/js/*.min.js.map
 
 #
 # Git ignores are weird, so bear with me for the rest of this:
