@@ -3,7 +3,7 @@
 Plugin Name: GifDrop
 Plugin URI: http://gifdrop.com/
 Description: Creates a repository page for all your animated gifs.
-Version: 0.9-beta-1
+Version: 0.9.0-beta-2
 Author: Mark Jaquith and Andrew Norcross
 Author URI: http://gifdrop.com/
 Text Domain: gifdrop
