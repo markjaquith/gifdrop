@@ -200,8 +200,10 @@ class app.Images extends app.ImageContainer
 class app.MainView extends app.View
 	className: 'wrapper'
 	initialize: ->
-		@views.add new app.ImageNavView collection: @collection
-		@views.add new app.ImagesListView collection: @collection
+		@views.add new app.ImageNavView
+			collection: @collection
+		@views.add new app.ImagesListView
+			collection: @collection
 		@views.add new app.BrowserView
 
 class app.ImageNavView extends app.View
@@ -268,15 +270,18 @@ class app.ImagesListView extends app.View
 		else
 			filter = ->
 				_.contains( _.chain( ids ).map( (id) -> "gif-#{id}" ).value(), $(@).attr('id') )
-		view.trigger 'loadImage' for view in @views.get() when _.contains( ids, view.model.get('id') )
+		view.trigger 'loadImage' for view in @views.get() when _.contains( ids, view.model.get 'id' )
 		@$el.isotope filter: filter
 
 	setSubviews: ->
-		gifViews = _.map @collection.models, (gif) -> new app.ImageListView model: gif
+		gifViews = _.map @collection.models, (gif) ->
+			new app.ImageListView
+				model: gif
 		if gifViews.length
 			@views.set gifViews
 		else if app.settings.canUpload
-			@views.add new app.ImagesListEmptyView collection: @collection
+			@views.add new app.ImagesListEmptyView
+				collection: @collection
 
 	resize: ->
 		if @windowWidth isnt $(window).width()
@@ -340,7 +345,8 @@ class app.ImageListView extends app.View
 		if app.smallMobile
 			window.location.href = @model.get 'src'
 		else
-			view = new app.SingleView model: @model
+			view = new app.SingleView
+				model: @model
 			app.modalView.open()
 			app.modalView.views.set view
 			@mouseout()
@@ -351,7 +357,8 @@ class app.ImageListView extends app.View
 			ratio = @model.get('imgWidth') / @model.get('imgHeight')
 			newWidth = @model.get('divHeight') * ratio
 			difference = @model.get('imgWidth') - newWidth
-			@$el.css padding: "0 #{difference/2}px"
+			@$el.css
+				padding: "0 #{difference/2}px"
 
 	restoreCrop: ->
 		if @model.get('imgHeight') isnt @model.get('divHeight')
@@ -372,7 +379,8 @@ class app.ImageListView extends app.View
 	ready: ->
 		@listenTo @views.parent, 'resize', @model.setImageDims
 		@$img.show().lazyload()
-		@views.parent.trigger 'newView', @model, @$el
+		@views.parent
+			.trigger 'newView', @model, @$el
 
 class app.ModalView extends app.View
 	attributes:
@@ -427,7 +435,8 @@ class app.SingleView extends app.View
 		data
 
 	save: ->
-		@model.set title: @$title.val()
+		@model.set
+			title: @$title.val()
 		# console.log 'Saving', @$title.val()
 		@model.save()
 
@@ -440,14 +449,19 @@ class app.SingleView extends app.View
 			@views.parent.close()
 
 	resize: =>
-		@$contentInner.css height: "#{_.min [$(window).height() - 120, @model.get('height') + 130 ]}px"
+		@$contentInner.css
+				height: "#{_.min [$(window).height() - 120, @model.get('height') + 130 ]}px"
 
 	alertCopied: =>
-		@$copyButton.html @$copyButton.data 'copied-message'
+		@$copyButton
+			.html @$copyButton.data 'copied-message'
 
 	selectURL: ->
 		if @$copyInput.is ':visible'
-			@$copyInput.prop('readonly', no).select().prop('readonly', yes)
+			@$copyInput
+				.prop 'readonly', no
+				.select()
+				.prop 'readonly', yes
 
 	clipboardFallback: =>
 		@$copyButton.hide()
@@ -460,7 +474,8 @@ class app.SingleView extends app.View
 		@$copyButton = @$contentInner.find 'button.copy'
 		@$copyInput = @$contentInner.find 'input.copy'
 
-		@$copyButton.css width: @model.get 'width'
+		@$copyButton.css
+			width: @model.get 'width'
 
 		@clipboard = new ZeroClipboard @$clipboardWrap.get(0)
 		@clipboard.on 'aftercopy', @alertCopied
