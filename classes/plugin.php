@@ -348,7 +348,7 @@ class GifDrop_Plugin {
 	 * Enqueues scripts on the settings page
 	 */
 	public function admin_enqueue_scripts() {
-		wp_enqueue_script( 'gifdrop-settings', $this->get_url() . 'js/admin.js', array( 'jquery' ), '0.3' );
+		wp_enqueue_script( 'gifdrop-settings', $this->get_url() . 'js/admin.min.js', array( 'jquery' ), '0.3' );
 	}
 
 	/**
@@ -453,7 +453,7 @@ class GifDrop_Plugin {
 		wp_register_script( 'gifdrop-isotope', $this->get_url() . 'bower_components/isotope/dist/isotope.pkgd.min.js', array('jquery'), '2.0.1' );
 		wp_register_script( 'gifdrop-lazyload', $this->get_url() . 'bower_components/jquery.lazyload/jquery.lazyload.min.js', array('jquery'), '1.9.3' );
 		wp_register_script( 'gifdrop-zeroclipboard', $this->get_url() . 'bower_components/zeroclipboard/dist/ZeroClipboard.min.js', array(), '2.1.6' );
-		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), self::JS_CSS_VERSION );
+		wp_register_script( 'gifdrop', $this->get_url() . 'js/gifdrop.min.js', array( 'jquery', 'backbone', 'wp-backbone', 'wp-util', 'wp-plupload', 'gifdrop-isotope', 'gifdrop-lazyload', 'gifdrop-zeroclipboard' ), self::JS_CSS_VERSION );
 	}
 
 	/**

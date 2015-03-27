@@ -240,7 +240,7 @@ class app.ImagesListView extends app.View
 	windowWidth: 0
 
 	initialize: ->
-		@windowWidth = $(window).width()
+		@windowWidth = app.$window.width()
 		@setSubviews()
 		@listenTo @collection, 'add', @addNew
 		@listenTo @, 'newView', @animateItemIn
@@ -284,20 +284,20 @@ class app.ImagesListView extends app.View
 				collection: @collection
 
 	resize: ->
-		if @windowWidth isnt $(window).width()
+		if @windowWidth isnt app.$window.width()
 			@pauseMasonry()
 			app.setGifWidthCSS()
 			@trigger 'resize'
 			@masonry()
-			@windowWidth = $(window).width()
+			@windowWidth = app.$window.width()
 
 	ready: ->
 		$ => @masonry()
-		$(window).on 'resize', @pauseMasonry
-		$(window).on 'resize', _.debounce( _.bind( @resize, @ ), 500 )
+		app.$window.on 'resize', @pauseMasonry
+		app.$window.on 'resize', _.debounce( _.bind( @resize, @ ), 500 )
 
 	pauseMasonry: =>
-		if @windowWidth isnt $(window).width()
+		if @windowWidth isnt app.$window.width()
 			@windowWidth = 0
 			@$el.hide() # We show it in masonry()
 			@$el.isotope 'destroy' if @$el.data 'isotope'
@@ -450,7 +450,7 @@ class app.SingleView extends app.View
 
 	resize: =>
 		@$contentInner.css
-				height: "#{_.min [$(window).height() - 120, @model.get('height') + 130 ]}px"
+				height: "#{_.min [app.$window.height() - 120, @model.get('height') + 130 ]}px"
 
 	alertCopied: =>
 		@$copyButton
@@ -488,4 +488,4 @@ class app.SingleView extends app.View
 			@$title.focus().val(@$title.val())
 		else if @$copyInput.is ':visible'
 			@selectURL()
-		$(window).on 'resize', _.throttle( @resize, 50 )
+		app.$window.on 'resize', _.throttle( @resize, 50 )
