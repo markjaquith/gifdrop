@@ -3,10 +3,11 @@ $ = window.jQuery
 app = window.gifdropApp =
 	init: ->
 		@$window = $ window
+		@$body = $ 'body'
 		@settings = gifdropSettings
 		@settings.canUpload = '1' is @settings.canUpload # Cast to bool
-		@$wrapper = $ 'body > #outer-wrapper'
-		@$modal = $ 'body > #modal'
+		@$wrapper = @$body.find '> #outer-wrapper'
+		@$modal = @$body.find '> #modal'
 		@setGifWidthCSS()
 		@images = new @Images _.toArray @settings.attachments
 
@@ -25,9 +26,9 @@ app = window.gifdropApp =
 		@$browser = $ '.browser'
 
 		@modalView.listenTo @modalView, 'modalOpen', ->
-			$('body').addClass 'modal-open'
+			app.$body.addClass 'modal-open'
 		@modalView.listenTo @modalView, 'modalClosed', ->
-			$('body').removeClass 'modal-open'
+			app.$body.removeClass 'modal-open'
 			$('input.search').focus()
 
 		@initUploads()
@@ -47,14 +48,14 @@ app = window.gifdropApp =
 
 		uploadStart = (uploader) ->
 			# console.log 'uploadStart', uploader
-			$('body').addClass 'uploading'
+			app.$body.addClass 'uploading'
 
 		uploadError = ->
 			alert 'error'
 
 		uploadSuccess = (attachment) ->
 			# console.log attachment
-			$('body').removeClass 'uploading'
+			app.$body.removeClass 'uploading'
 			attr = attachment.attributes
 			full = attr.sizes.full
 			unanimated = attr.sizes['full-gif-static'] or full
@@ -411,7 +412,7 @@ class app.ModalView extends app.View
 			@close()
 
 	ready: ->
-		$('body').on 'keyup', (e) =>
+		app.$body.on 'keyup', (e) =>
 			if e.which is 27
 				@close()
 
@@ -459,9 +460,9 @@ class app.SingleView extends app.View
 	selectURL: ->
 		if @$copyInput.is ':visible'
 			@$copyInput
-				.prop 'readonly', no
+				.prop readonly: no
 				.select()
-				.prop 'readonly', yes
+				.prop readonly: yes
 
 	clipboardFallback: =>
 		@$copyButton.hide()
