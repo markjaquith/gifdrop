@@ -67,12 +67,13 @@ module.exports = (grunt) ->
 				files: coffee_uglify_files
 
 		compass:
-			options:
-				sassDir: 'css'
-				cssDir: 'css'
-				imagesDir: 'images'
-				sourcemap: yes
-				environment: 'production'
+			default:
+				options:
+					sassDir: 'css'
+					cssDir: 'css'
+					imagesDir: 'images'
+					sourcemap: yes
+					environment: 'production'
 
 		phpunit:
 			default: {}
@@ -84,7 +85,7 @@ module.exports = (grunt) ->
 				options:
 					debounceDelay: 5000
 			sass:
-				files: [ 'css/*.sass' ]
+				files: [ 'css/*.scss' ]
 				tasks: [ 'compass' ]
 				options:
 					debounceDelay: 500
