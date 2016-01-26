@@ -6,7 +6,9 @@
 
 <script type="text/html" id="tmpl-nav">
 <h1><?php echo esc_html( GifDrop_Plugin::get_instance()->get_site_name() ); ?></h1>
-<input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
+<div class="search-wrapper">
+	<input class="search" type="text" placeholder="<?php _e( 'Search&hellip;', 'gifdrop' ); ?>" />
+</div>
 </script>
 
 <script type="text/html" id="tmpl-empty">

@@ -70,9 +70,11 @@ input, button {
 	z-index: 2;
 	background: white;
 	width: 100%;
+	display: table;
 	h1 {
 		margin: 0;
-		float: left;
+	//	float: left;
+		display: table-cell;
 		padding: 8px;
 		font-size: 24px;
 		line-height: 30px;
@@ -80,19 +82,33 @@ input, button {
 		background: #222222;
 		letter-spacing: 0.01em;
 		@media screen and (max-width: 640px) {
-			width: 35%;
+		//	width: 35%;
 		}
 	}
-	input {
-		float: left;
-		width: 250px;
-		margin: 8px;
+
+	.search-wrapper {
+		display: table-cell;
+		margin: 0;
+		padding: 3px 5px;
 		height: 30px;
+	}
+
+	input {
+	//	float: left;
+	//	width: 250px;
+	//	display: table-cell;
+	//	margin: 8px;
+	//	padding: 3px;
+	//	height: 30px;
+		display: block;
+		width: 100%;
 		font-size: 18px;
-		padding: 3px;
+		line-height: 24px;
 		border: none;
+		margin: 0;
+		padding: 0;
 		@media screen and (max-width: 640px) {
-			width: 60%;
+		//	width: 60%;
 		}
 	}
 }
